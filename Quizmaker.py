@@ -21,7 +21,7 @@ class Question:
 
     def __init__(self, qCode, qBook, qChapter, qVerseStart, qVerseEnd, qType, qQuestion, qAnswer):
         """
-        The constructor for class Question
+        The constructor for class Question.
 
         Parameters:
             qCode (int / str): The unique code of question.
@@ -74,12 +74,11 @@ class QuestionList:
 
     Attributes:
         questionDatabase (array of Question): The array that stores all of the questions.
-        materialRange (array of Chapter): The array that stores all of the material chapters.
     """
 
     questionDatabase = [] # The array that stores all of the material chapters
 
-    def __init__(self, questionFileName="questions.txt"):
+    def __init__(self, questionFileName = "questions.txt"):
         """
         The constructor for class Question List.
 
