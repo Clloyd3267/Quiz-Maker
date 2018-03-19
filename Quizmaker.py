@@ -5,14 +5,15 @@
 ###################################################################################################
 
 class Question:
-    def __init__(self, qCode, qType, qQuestion, qAnswer, qBook, qChapter, qVerse):
+    def __init__(self, qCode, qBook, qChapter, qVerseStart, qVerseEnd, qType, qQuestion, qAnswer):
         self.questionCode = qCode
+        self.questionBook = qBook
+        self.questionChapter = qChapter
+        self.questionVerseStart = qVerseStart
+        self.questionVerseEnd = qVerseEnd
         self.questionType = qType
         self.questionQuestion = qQuestion
         self.questionAnswer = qAnswer
-        self.questionBook = qBook
-        self.questionChapter = qChapter
-        self.questionVerse = qVerse
 
 class Chapter:
     def __init__(self, cBook, cChapter):
@@ -20,28 +21,28 @@ class Chapter:
         self.chapterChapter = cChapter
         self.chapterVerses = []
 
-#class configData():
-#    def __init__(self):
-#        self.
-                        
 
 class QuestionList:
     questionDatabase = []
     materialRange = []
 
-    def __init__(self, configFilename = "config.csv", questionFileName="questions.csv", materialFileName = "material.csv"):
+    def __init__(self, configFilename = "config.csv", questionFileName="questions.txt", materialFileName = "material.csv"):
       self.importQuestions(questionFileName)
       self.importMaterial(materialFileName)
       self.exportQuestions(questionFileName)
 
     def importQuestions(self, questionFileName):
         questionFile = open(questionFileName, "r", encoding = "latin-1")
+        #next(questionFile)
         for question in questionFile:
-            question = question.rstrip(",")
-            fields = question.split(",")
+            # question = question.rstrip(",")
+            fields = question.split("$")
+            # if len(fields) != 8:
+            #     print(str(i) + ": " + str(len(fields)))
+
             if fields[0] != "":
-                fields[0] = self.alphaCodeToDigitCode(fields[0]) 
-            questionObj = Question(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6])
+                fields[0] = self.alphaCodeToDigitCode(fields[0])
+            questionObj = Question(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7])
             self.questionDatabase.append(questionObj)
         questionFile.close()
         self.generateCodes()
@@ -58,16 +59,17 @@ class QuestionList:
         materialFile.close()
     
     def exportQuestions(self, questionFileName):
-        open("filename","w").close()
+        # open(questionFileName,"w").close()
         questionFile = open(questionFileName, "w", encoding = "latin-1")
         for question in self.questionDatabase:
-            line =  self.digitCodeToAlphaCode(question.questionCode) + ","
-            line += question.questionType + ","
-            line += question.questionQuestion + ","
-            line += question.questionAnswer + ","
-            line += question.questionBook + ","
-            line += question.questionChapter + ","
-            line += question.questionVerse + "\n"
+            line =  self.digitCodeToAlphaCode(question.questionCode) + "$"
+            line += question.questionBook + "$"
+            line += question.questionChapter + "$"
+            line += question.questionVerseStart + "$"
+            line += question.questionVerseEnd + "$"
+            line += question.questionType + "$"
+            line += question.questionQuestion + "$"
+            line += question.questionAnswer
             questionFile.write(line)
         questionFile.close()
 
@@ -77,11 +79,11 @@ class QuestionList:
     #        line.rstrip()
     #    configFile.close()
 
-    def printQuestions(self):
-      for question in self.questionDatabase:
-        print("Type: " + question.Type + " Question: " + question.Question + 
-              " Answer: " + question.Answer + " Book: " + question.Book + 
-              " Chapter: " + question.Chapter + " Verse: " + question.Verse)
+    # def printQuestions(self):
+    #   for question in self.questionDatabase:
+    #     print("Type: " + question.Type + " Question: " + question.Question +
+    #           " Answer: " + question.Answer + " Book: " + question.Book +
+    #           " Chapter: " + question.Chapter + " Verse: " + question.Verse)
 
     def printMaterial(self):
         for chapter in self.materialRange:
@@ -97,13 +99,18 @@ class QuestionList:
             if question.questionCode != "":
                 if largestCode < question.questionCode:
                     largestCode = question.questionCode
-    
+
+        if largestCode == -1:
+            largestCode = 0
+        else:
+             largestCode = self.incrementCode(largestCode)
+
         # Assign codes to any questions that do not have one yet
         for question in self.questionDatabase:
             if question.questionCode == "":
-                largestCode += 1             
                 question.questionCode = largestCode
-    
+                largestCode = self.incrementCode(largestCode)
+
     def decToBin(self, decNum, numberOfBits):
         """Helper func that takes as an input a decimal number and converts it to a binary number"""
     
@@ -131,10 +138,37 @@ class QuestionList:
         """Function to convert from decimal number to an "AAA" alpha code"""
     
         binaryCode = self.decToBin(digitCode, 15)
-        seperateBinNums = [binaryCode[0:5], binaryCode[5:10], binaryCode[10:15]]
-        seperateDecNums = [self.binToDec(seperateBinNums[0]), self.binToDec(seperateBinNums[1]), self.binToDec(seperateBinNums[2])]
-        alphaCode = str(chr(seperateDecNums[0] + 97)) + str(chr(seperateDecNums[1] + 97)) + str(chr(seperateDecNums[2] + 97))
-        return alphaCode  
+        separateBinNums = [binaryCode[0:5], binaryCode[5:10], binaryCode[10:15]]
+        separateDecNums = [self.binToDec(separateBinNums[0]), self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
+        alphaCode = str(chr(separateDecNums[0] + 97)) + str(chr(separateDecNums[1] + 97)) + str(chr(separateDecNums[2] + 97))
+        return alphaCode
+
+    def incrementCode(self, digitCode):
+
+        # Convert to three decimal numbers 1-26
+        binaryCode = self.decToBin(digitCode, 15)
+        separateBinNums = [binaryCode[0:5], binaryCode[5:10], binaryCode[10:15]]
+        separateDecNums = [self.binToDec(separateBinNums[0]), self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
+
+        # Increment Number
+        if separateDecNums[2] < 25:
+            separateDecNums[2] += 1
+
+        elif separateDecNums[1] < 25:
+            separateDecNums[1] += 1
+            separateDecNums[2] = 0
+
+        elif separateDecNums[0] < 25:
+            separateDecNums[0] += 1
+            separateDecNums[1] = 0
+            separateDecNums[2] = 0
+        else:
+            print("ERROR!!! -> Code index went past 17576!")
+
+        # Convert back to decimal
+        binaryCode = str(self.decToBin(separateDecNums[0], 5)) + str(self.decToBin(separateDecNums[1], 5)) + str(self.decToBin(separateDecNums[2], 5))
+        digitCode = self.binToDec(binaryCode)
+        return digitCode
 
 
 ql1 = QuestionList()        
