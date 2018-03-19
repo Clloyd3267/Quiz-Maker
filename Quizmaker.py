@@ -1,11 +1,39 @@
 ###################################################################################################
 # Name        : QuizMaker.py
-# Author(s)   : Chris Lloyd
+# Author(s)   : Chris Lloyd, Andrew Southwick
 # Description : A program to create quizzes
 ###################################################################################################
 
 class Question:
+    """
+    A class to store the attributes of a question.
+
+    Attributes:
+        questionCode (int / str): The unique code of question.
+        questionBook (str): The book of question.
+        questionChapter (str): The chapter of question.
+        questionVerseStart (str): The start verse of question.
+        questionVerseEnd (str): The end verse (if any) of question.
+        questionType (str): The type of question.
+        questionQuestion (str): the question of question.
+        questionAnswer (str): The answer to question.
+    """
+
     def __init__(self, qCode, qBook, qChapter, qVerseStart, qVerseEnd, qType, qQuestion, qAnswer):
+        """
+        The constructor for class Question
+
+        Parameters:
+            qCode (int / str): The unique code of question.
+            qBook (str): The book of question.
+            qChapter (str): The chapter of question.
+            qVerseStart (str): The start verse of question.
+            qVerseEnd (str): The end verse (if any) of question.
+            qType (str): The type of question.
+            qQuestion (str): the question of question.
+            qAnswer (str): The answer to question.
+        """
+
         self.questionCode = qCode
         self.questionBook = qBook
         self.questionChapter = qChapter
@@ -15,52 +43,86 @@ class Question:
         self.questionQuestion = qQuestion
         self.questionAnswer = qAnswer
 
+
 class Chapter:
+    """
+    A class to store the attributes of a chapter of references.
+
+    Attributes:
+        chapterBook (str): The book of chapter.
+        chapterChapter (str): The chapter of chapter.
+        chapterVerses (array of str): The verses of chapter
+    """
+
     def __init__(self, cBook, cChapter):
+        """
+        The constructor for class Chapter.
+
+        Parameters:
+            cBook(str): The book of chapter.
+            cChapter(str): The chapter of chapter.
+        """
+
         self.chapterBook = cBook
         self.chapterChapter = cChapter
         self.chapterVerses = []
 
 
 class QuestionList:
+    """
+    A class to store the questions and perform functions on them.
+
+    Attributes:
+        questionDatabase (array of Question): The array that stores all of the questions.
+        materialRange (array of Chapter): The array that stores all of the material chapters.
+    """
+
     questionDatabase = []
     materialRange = []
 
-    def __init__(self, configFilename = "config.csv", questionFileName="questions.txt", materialFileName = "material.csv"):
-      self.importQuestions(questionFileName)
-      self.importMaterial(materialFileName)
-      self.exportQuestions(questionFileName)
+    def __init__(self, questionFileName="questions.txt"):
+        """
+        The constructor for class Question List.
+
+        Parameters:
+            questionFileName (str): The input filename for questions, defaults to "questions.txt".
+        """
+
+        self.importQuestions(questionFileName)
+        self.exportQuestions(questionFileName)
 
     def importQuestions(self, questionFileName):
-        questionFile = open(questionFileName, "r", encoding = "latin-1")
-        #next(questionFile)
-        for question in questionFile:
-            # question = question.rstrip(",")
-            fields = question.split("$")
-            # if len(fields) != 8:
-            #     print(str(i) + ": " + str(len(fields)))
+        """
+        Function to import questions and populate QuestionList object.
 
+        Parameters:
+            questionFileName (str): The input filename for questions.
+        """
+
+        questionFile = open(questionFileName, "r", encoding = "latin-1") # Open the file for reading
+        #next(questionFile) # CDL=> Should we assume there is a header row?
+
+        # For each line in file, place into proper question object
+        for question in questionFile:
+            fields = question.split("$")
             if fields[0] != "":
                 fields[0] = self.alphaCodeToDigitCode(fields[0])
             questionObj = Question(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7])
             self.questionDatabase.append(questionObj)
-        questionFile.close()
-        self.generateCodes()
-
-    def importMaterial(self, materialFileName):
-        materialFile = open(materialFileName, "r", encoding = "latin-1")
-        for chapter in materialFile:
-            chapter = chapter.rstrip()
-            fields = chapter.split(",")
-            materialObj = Chapter(fields[0], fields[1])
-            for verse in fields[2:]:
-                materialObj.chapterVerses.append(verse)
-            self.materialRange.append(materialObj)
-        materialFile.close()
+        questionFile.close() # Close the file
+        self.generateCodes() # Add unique codes to those that do not have them
     
     def exportQuestions(self, questionFileName):
-        # open(questionFileName,"w").close()
-        questionFile = open(questionFileName, "w", encoding = "latin-1")
+        """
+        Function to export questions from QuestionList object.
+
+        Parameters:
+            questionFileName (str): The input filename for questions.
+        """
+
+        questionFile = open(questionFileName, "w", encoding = "latin-1")  # Open the file for writing
+
+        # For each question in question list, write back out to file
         for question in self.questionDatabase:
             line =  self.digitCodeToAlphaCode(question.questionCode) + "$"
             line += question.questionBook + "$"
@@ -71,13 +133,7 @@ class QuestionList:
             line += question.questionQuestion + "$"
             line += question.questionAnswer
             questionFile.write(line)
-        questionFile.close()
-
-    #def importQuizConfig(self, configFilename)
-    #    configFile = open(configFilename, "r", encoding = "latin-1")
-    #    for line in configFile:
-    #        line.rstrip()
-    #    configFile.close()
+        questionFile.close() # Close the file
 
     # def printQuestions(self):
     #   for question in self.questionDatabase:
@@ -85,14 +141,11 @@ class QuestionList:
     #           " Answer: " + question.Answer + " Book: " + question.Book +
     #           " Chapter: " + question.Chapter + " Verse: " + question.Verse)
 
-    def printMaterial(self):
-        for chapter in self.materialRange:
-            verses = ",".join(chapter.chapterVerses)
-            print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
-
     def generateCodes(self):
-        """Function to generate codes for questions that do not have one yet"""
-    
+        """
+        Function to generate codes for questions that do not have codes.
+        """
+
         # Find the highest code used
         largestCode = -1
         for question in self.questionDatabase:
@@ -100,6 +153,7 @@ class QuestionList:
                 if largestCode < question.questionCode:
                     largestCode = question.questionCode
 
+        # Increment largestCode
         if largestCode == -1:
             largestCode = 0
         else:
@@ -112,22 +166,47 @@ class QuestionList:
                 largestCode = self.incrementCode(largestCode)
 
     def decToBin(self, decNum, numberOfBits):
-        """Helper func that takes as an input a decimal number and converts it to a binary number"""
-    
+        """
+        Helper func that takes as an input a decimal number and converts it to a binary number.
+
+        Parameters:
+            decNum (int): Decimal number to be converted.
+            numberOfBits (int): Number of bits that output number should be.
+
+        Returns:
+            binNum (str): The result of conversion.
+        """
+
         decNum = int(decNum)
         formatCode = '0' + str(numberOfBits) + 'b'
         binNum = format(decNum, formatCode)
         return binNum
     
     def binToDec(self, binNum):
-        """Helper func that takes as an input a binary number and converts it to a decimal number"""
+        """
+        Helper func that takes as an input a binary number and converts it to a decimal number.
+
+        Parameters:
+            binNum (str): Binary number to be converted.
+
+        Returns:
+            decNum (int): The result of conversion.
+        """
     
         binNum = str(binNum)
         decNum = int(binNum, 2)
         return decNum
     
     def alphaCodeToDigitCode(self, alphaCode):
-        """Function to convert from "AAA" alpha code to a decimal number"""
+        """
+        Function to convert from "AAA" alpha code to a decimal number.
+
+        Parameters:
+           alphaCode (str): Three letter code to be converted.
+
+        Returns:
+            digitCode (int): The result of conversion.
+        """
     
         asciiNums = [(ord(c) - 97) for c in alphaCode]
         binaryCode = str(self.decToBin(asciiNums[0], 5)) + str(self.decToBin(asciiNums[1], 5)) + str(self.decToBin(asciiNums[2], 5))
@@ -135,8 +214,16 @@ class QuestionList:
         return digitCode
     
     def digitCodeToAlphaCode(self, digitCode):
-        """Function to convert from decimal number to an "AAA" alpha code"""
-    
+        """
+        Function to convert from decimal number to an "AAA" alpha code.
+
+        Parameters:
+           digitCode (int): Integer number to be converted.
+
+        Returns:
+            alphaCode (str): The result of conversion.
+        """
+
         binaryCode = self.decToBin(digitCode, 15)
         separateBinNums = [binaryCode[0:5], binaryCode[5:10], binaryCode[10:15]]
         separateDecNums = [self.binToDec(separateBinNums[0]), self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
@@ -144,6 +231,15 @@ class QuestionList:
         return alphaCode
 
     def incrementCode(self, digitCode):
+        """
+        Function increment custom integer code.
+
+        Parameters:
+           digitCode (int): Integer number to be incremented.
+
+        Returns:
+            digitCode (int): Integer number after being incremented.
+        """
 
         # Convert to three decimal numbers 1-26
         binaryCode = self.decToBin(digitCode, 15)
@@ -171,4 +267,31 @@ class QuestionList:
         return digitCode
 
 
-ql1 = QuestionList()        
+if __name__ == "__main__":
+    help(QuestionList)
+    ql1 = QuestionList() # Create an object of type QuestionList
+
+
+# Extra functions and data
+# configFilename = "config.csv", materialFileName = "material.csv"
+#def importMaterial(self, materialFileName):
+#    materialFile = open(materialFileName, "r", encoding = "latin-1")
+#    for chapter in materialFile:
+#        chapter = chapter.rstrip()
+#        fields = chapter.split(",")
+#        materialObj = Chapter(fields[0], fields[1])
+#        for verse in fields[2:]:
+#            materialObj.chapterVerses.append(verse)
+#        self.materialRange.append(materialObj)
+#    materialFile.close()
+
+#def importQuizConfig(self, configFilename)
+#    configFile = open(configFilename, "r", encoding = "latin-1")
+#    for line in configFile:
+#        line.rstrip()
+#    configFile.close()
+
+#   def printMaterial(self):
+#       for chapter in self.materialRange:
+#           verses = ",".join(chapter.chapterVerses)
+#           print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
