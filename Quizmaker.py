@@ -228,7 +228,7 @@ class QuestionList:
 
     def incrementCode(self, digitCode):
         """
-        Function increment custom integer code.
+        Function to increment custom integer code.
 
         Parameters:
            digitCode (int): Integer number to be incremented.
@@ -264,6 +264,7 @@ class QuestionList:
         digitCode = self.binToDec(binaryCode)
         return digitCode
 
+
 class MaterialList:
     """
     A class to store the material and perform operations on it.
@@ -286,7 +287,7 @@ class MaterialList:
 
     def importMaterial(self, materialFileName):
         """
-        Function import and store material.
+        Function to import and store material.
 
         Parameters:
            materialFileName (str): The input filename for material.
@@ -313,8 +314,63 @@ class MaterialList:
             verses = ",".join(chapter.chapterVerses)
             print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
 
-    # def checkRange(self): # CDL=> Implement this function, checkRange
-    # Check if range is in material
+    def checkRange(self, arrayOfRanges):
+        """
+        Function to validate multiple ranges.
+
+        Parameters:
+            arrayOfRanges (array of str): Input ranges to be validated.
+
+        Returns:
+            (bool): True or False output indicating result of check
+        """
+
+        for refRange in arrayOfRanges:
+
+            # Check to make sure all references are valid
+            refRange = refRange.split("-")
+            startRef = refRange[0].split(",")
+            endRef = refRange[1].split(",")
+            if not self.checkRef(startRef):
+                return False
+            if not self.checkRef(endRef):
+                return False
+
+            # Check to make sure all ranges are valid
+            i = 0
+            for chapter in self.materialRange:
+                if startRef[0] == chapter.chapterBook and startRef[1] == chapter.chapterChapter:
+                    startIndex = i
+
+                if endRef[0] == chapter.chapterBook and endRef[1] == chapter.chapterChapter:
+                    endIndex = i
+                i += 1
+            if startIndex > endIndex:
+                return False
+
+            elif startIndex == endIndex:
+                if int(startRef[2]) > int(endRef[2]):
+                    return False
+
+        return True # Return True if ranges are not invalid
+
+    def checkRef(self, reference):
+        """
+        Function to validate a reference.
+
+        Parameters:
+            reference (array of str): Input reference to be validated.
+
+        Returns:
+            (bool): True or False output indicating result of check
+        """
+
+        for chapter in self.materialRange:
+            if reference[0] == chapter.chapterBook and reference[1] == chapter.chapterChapter:
+                for verse in chapter.chapterVerses:
+                    if verse == reference[2]:
+                        return True
+        return False
 
 
 if __name__ == "__main__":
@@ -327,7 +383,10 @@ if __name__ == "__main__":
 
     ql1 = QuestionList() # Create an object of type QuestionList
     ml1 = MaterialList() # Create an object of type QuestionList
-    ml1.printMaterial()  # Print the Material list to ensure it is working
+
+    # refRange = ["1 Corinthians,1,1-2 Corinthians,1,1"] # Test range for checkRange func
+    # print("Range Valid: " + str(ml1.checkRange(refRange))) # Testing checkRange func
+    # ml1.printMaterial()  # Print the Material list to ensure it is working
 
 
 # Extra functions and data for later
