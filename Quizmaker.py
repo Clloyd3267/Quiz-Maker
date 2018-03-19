@@ -77,8 +77,7 @@ class QuestionList:
         materialRange (array of Chapter): The array that stores all of the material chapters.
     """
 
-    questionDatabase = []
-    materialRange = []
+    questionDatabase = [] # The array that stores all of the material chapters
 
     def __init__(self, questionFileName="questions.txt"):
         """
@@ -107,7 +106,8 @@ class QuestionList:
             fields = question.split("$")
             if fields[0] != "":
                 fields[0] = self.alphaCodeToDigitCode(fields[0])
-            questionObj = Question(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7])
+            questionObj = Question(fields[0], fields[1], fields[2],
+                                   fields[3], fields[4], fields[5], fields[6], fields[7])
             self.questionDatabase.append(questionObj)
         questionFile.close() # Close the file
         self.generateCodes() # Add unique codes to those that do not have them
@@ -124,7 +124,7 @@ class QuestionList:
 
         # For each question in question list, write back out to file
         for question in self.questionDatabase:
-            line =  self.digitCodeToAlphaCode(question.questionCode) + "$"
+            line = self.digitCodeToAlphaCode(question.questionCode) + "$"
             line += question.questionBook + "$"
             line += question.questionChapter + "$"
             line += question.questionVerseStart + "$"
@@ -134,12 +134,6 @@ class QuestionList:
             line += question.questionAnswer
             questionFile.write(line)
         questionFile.close() # Close the file
-
-    # def printQuestions(self):
-    #   for question in self.questionDatabase:
-    #     print("Type: " + question.Type + " Question: " + question.Question +
-    #           " Answer: " + question.Answer + " Book: " + question.Book +
-    #           " Chapter: " + question.Chapter + " Verse: " + question.Verse)
 
     def generateCodes(self):
         """
@@ -209,7 +203,8 @@ class QuestionList:
         """
     
         asciiNums = [(ord(c) - 97) for c in alphaCode]
-        binaryCode = str(self.decToBin(asciiNums[0], 5)) + str(self.decToBin(asciiNums[1], 5)) + str(self.decToBin(asciiNums[2], 5))
+        binaryCode = (str(self.decToBin(asciiNums[0], 5)) +
+                      str(self.decToBin(asciiNums[1], 5)) + str(self.decToBin(asciiNums[2], 5)))
         digitCode = self.binToDec(binaryCode)
         return digitCode
     
@@ -226,8 +221,10 @@ class QuestionList:
 
         binaryCode = self.decToBin(digitCode, 15)
         separateBinNums = [binaryCode[0:5], binaryCode[5:10], binaryCode[10:15]]
-        separateDecNums = [self.binToDec(separateBinNums[0]), self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
-        alphaCode = str(chr(separateDecNums[0] + 97)) + str(chr(separateDecNums[1] + 97)) + str(chr(separateDecNums[2] + 97))
+        separateDecNums = [self.binToDec(separateBinNums[0]),
+                           self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
+        alphaCode = (str(chr(separateDecNums[0] + 97)) +
+                     str(chr(separateDecNums[1] + 97)) + str(chr(separateDecNums[2] + 97)))
         return alphaCode
 
     def incrementCode(self, digitCode):
@@ -244,7 +241,8 @@ class QuestionList:
         # Convert to three decimal numbers 1-26
         binaryCode = self.decToBin(digitCode, 15)
         separateBinNums = [binaryCode[0:5], binaryCode[5:10], binaryCode[10:15]]
-        separateDecNums = [self.binToDec(separateBinNums[0]), self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
+        separateDecNums = [self.binToDec(separateBinNums[0]),
+                           self.binToDec(separateBinNums[1]), self.binToDec(separateBinNums[2])]
 
         # Increment Number
         if separateDecNums[2] < 25:
@@ -262,36 +260,83 @@ class QuestionList:
             print("ERROR!!! -> Code index went past 17576!")
 
         # Convert back to decimal
-        binaryCode = str(self.decToBin(separateDecNums[0], 5)) + str(self.decToBin(separateDecNums[1], 5)) + str(self.decToBin(separateDecNums[2], 5))
+        binaryCode = (str(self.decToBin(separateDecNums[0], 5)) +
+                      str(self.decToBin(separateDecNums[1], 5)) + str(self.decToBin(separateDecNums[2], 5)))
         digitCode = self.binToDec(binaryCode)
         return digitCode
 
+class MaterialList:
+    """
+    A class to store the material and perform operations on it.
+
+    Attributes:
+        materialRange (array of Chapter objects): An array to store the material references data.
+    """
+
+    materialRange = [] # An array to store the material references data
+
+    def __init__(self, materialFileName = "material.csv"):
+        """
+        The constructor for class MaterialList.
+
+        Parameters:
+            materialFileName (str): The input filename for material, defaults to "material.csv".
+        """
+
+        self.importMaterial(materialFileName)
+
+    def importMaterial(self, materialFileName):
+        """
+        Function import and store material.
+
+        Parameters:
+           materialFileName (str): The input filename for material.
+        """
+
+        materialFile = open(materialFileName, "r", encoding = "latin-1") # Open the file for reading
+
+        # For each line in file, place into proper Chapter object
+        for chapter in materialFile:
+            chapter = chapter.rstrip()
+            fields = chapter.split(",")
+            materialObj = Chapter(fields[0], fields[1])
+            for verse in fields[2:]:
+                materialObj.chapterVerses.append(verse)
+            self.materialRange.append(materialObj)
+        materialFile.close() # Close the file
+
+    def printMaterial(self):
+        """
+        Function print material.
+        """
+
+        for chapter in self.materialRange:
+            verses = ",".join(chapter.chapterVerses)
+            print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
+
+    # def checkRange(self): # CDL=> Implement this function, checkRange
+    # Check if range is in material
+
 
 if __name__ == "__main__":
-    help(QuestionList)
+
+    # Example help functions
+    # help(Question)
+    # help(Chapter)
+    # help(QuestionList)
+    # help(MaterialList)
+
     ql1 = QuestionList() # Create an object of type QuestionList
+    ml1 = MaterialList() # Create an object of type QuestionList
+    ml1.printMaterial()  # Print the Material list to ensure it is working
 
 
-# Extra functions and data
-# configFilename = "config.csv", materialFileName = "material.csv"
-#def importMaterial(self, materialFileName):
-#    materialFile = open(materialFileName, "r", encoding = "latin-1")
-#    for chapter in materialFile:
-#        chapter = chapter.rstrip()
-#        fields = chapter.split(",")
-#        materialObj = Chapter(fields[0], fields[1])
-#        for verse in fields[2:]:
-#            materialObj.chapterVerses.append(verse)
-#        self.materialRange.append(materialObj)
-#    materialFile.close()
+# Extra functions and data for later
+
+# configFilename = "config.csv"
 
 #def importQuizConfig(self, configFilename)
 #    configFile = open(configFilename, "r", encoding = "latin-1")
 #    for line in configFile:
 #        line.rstrip()
 #    configFile.close()
-
-#   def printMaterial(self):
-#       for chapter in self.materialRange:
-#           verses = ",".join(chapter.chapterVerses)
-#           print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
