@@ -4,29 +4,29 @@
 # Description : Classes to store and manage material references
 ###################################################################################################
 
-
-class Chapter:
-    """
-    A class to store the attributes of a chapter of references.
-
-    Attributes:
-        chapterBook (str): The book of chapter.
-        chapterChapter (str): The chapter of chapter.
-        chapterVerses (array of str): The verses of chapter.
-    """
-
-    def __init__(self, cBook, cChapter):
-        """
-        The constructor for class Chapter.
-
-        Parameters:
-            cBook (str): The book of chapter.
-            cChapter (str): The chapter of chapter.
-        """
-
-        self.chapterBook = cBook
-        self.chapterChapter = cChapter
-        self.chapterVerses = []
+#
+# class Chapter:
+#     """
+#     A class to store the attributes of a chapter of references.
+#
+#     Attributes:
+#         chapterBook (str): The book of chapter.
+#         chapterChapter (str): The chapter of chapter.
+#         chapterVerses (array of str): The verses of chapter.
+#     """
+#
+#     def __init__(self, cBook, cChapter):
+#         """
+#         The constructor for class Chapter.
+#
+#         Parameters:
+#             cBook (str): The book of chapter.
+#             cChapter (str): The chapter of chapter.
+#         """
+#
+#         self.chapterBook = cBook
+#         self.chapterChapter = cChapter
+#         self.chapterVerses = []
 
 
 class MaterialList:
@@ -34,7 +34,7 @@ class MaterialList:
     A class to store the material and perform operations on it.
 
     Attributes:
-        materialRange (array of Chapter objects): An array to store the material references data.
+        materialRange (array of array of str): An array to store the material references data.
     """
 
     materialRange = [] # An array to store the material references data
@@ -63,20 +63,67 @@ class MaterialList:
         for chapter in materialFile:
             chapter = chapter.rstrip()
             fields = chapter.split(",")
-            materialObj = Chapter(fields[0], fields[1])
             for verse in fields[2:]:
-                materialObj.chapterVerses.append(verse)
-            self.materialRange.append(materialObj)
+                self.materialRange.append([fields[0], fields[1], verse])
         materialFile.close()
 
     def printMaterial(self):
         """
-        Function print material.
+        Function to print material.
         """
 
-        for chapter in self.materialRange:
-            verses = ",".join(chapter.chapterVerses)
-            print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
+        chapter = []
+        chapter.append(self.materialRange[0][0])
+        chapter.append(self.materialRange[0][1])
+        for verse in self.materialRange:
+            if verse[1] != chapter[1]:
+                chapterVerses = ",".join(chapter[2:])
+                print(verse[0] + " " + verse[1] + ": " + chapterVerses)
+                chapter.clear()
+                chapter.append(verse[0])
+                chapter.append(verse[1])
+                chapter.append(verse[2])
+            else:
+                chapter.append(verse[2])
+
+    def isVerseInRange(self, searchVerse, arrayOfRanges):
+        """
+        Function to validate that a verse is in one of multiple ranges.
+
+        Parameters:
+            searchVerse (str): Input verse to be validated.
+            arrayOfRanges (array of str): Input ranges.
+
+        Returns:
+            (bool): True or False output indicating result of check.
+        """
+
+        searchVerse = searchVerse.split(",")
+        if not self.checkRange(arrayOfRanges) or not self.checkRef(searchVerse):
+            print("Error!!! verse not in range or verse doesnt exist") # CDL=> ERROR spot
+            return False
+
+        for refRange in arrayOfRanges:
+            refRange = refRange.split("-")
+            startRef = refRange[0].split(",")
+            endRef = refRange[1].split(",")
+
+            i = 0
+            for verse in self.materialRange:
+                if verse[0] == startRef[0] and verse[1] == startRef[1] and verse[2] == startRef[2]:
+                    startIndex = i
+
+                if verse[0] == searchVerse[0] and verse[1] == searchVerse[1] and verse[2] == searchVerse[2]:
+                    searchVerseIndex = i
+
+                if verse[0] == endRef[0] and verse[1] == endRef[1] and verse[2] == endRef[2]:
+                    endIndex = i
+                i += 1
+
+            if startIndex <= searchVerseIndex <= endIndex:
+                return True
+            else:
+                return False
 
     def checkRange(self, arrayOfRanges):
         """
@@ -95,28 +142,22 @@ class MaterialList:
             refRange = refRange.split("-")
             startRef = refRange[0].split(",")
             endRef = refRange[1].split(",")
-            if not self.checkRef(startRef):
-                return False
-            if not self.checkRef(endRef):
+            if not self.checkRef(startRef) or not self.checkRef(endRef):
                 return False
 
-            # Check to make sure all ranges are valid
             i = 0
-            for chapter in self.materialRange:
-                if startRef[0] == chapter.chapterBook and startRef[1] == chapter.chapterChapter:
+            for verse in self.materialRange:
+                if verse[0] == startRef[0] and verse[1] == startRef[1] and verse[2] == startRef[2]:
                     startIndex = i
 
-                if endRef[0] == chapter.chapterBook and endRef[1] == chapter.chapterChapter:
+                if verse[0] == endRef[0] and verse[1] == endRef[1] and verse[2] == endRef[2]:
                     endIndex = i
                 i += 1
+
             if startIndex > endIndex:
                 return False
 
-            elif startIndex == endIndex:
-                if int(startRef[2]) > int(endRef[2]):
-                    return False
-
-        return True # Return True if ranges are not invalid
+        return True
 
     def checkRef(self, reference):
         """
@@ -129,9 +170,16 @@ class MaterialList:
             (bool): True or False output indicating result of check.
         """
 
-        for chapter in self.materialRange:
-            if reference[0] == chapter.chapterBook and reference[1] == chapter.chapterChapter:
-                for verse in chapter.chapterVerses:
-                    if verse == reference[2]:
-                        return True
+        for verse in self.materialRange:
+            if verse[0] == reference[0] and verse[1] == reference[1] and verse[2] == reference[2]:
+                return True
         return False
+
+
+# if __name__ == '__main__':
+#     ml1 = MaterialList()  # Create an object of type MaterialList
+#     ml1.printMaterial()   # Print all References
+#     refRange = ["1 Corinthians,1,1-2 Corinthians,1,1"] # Test range for checkRange func
+#     verse = "2 Corinthians,2,3"
+#     print("Range Valid: " + str(ml1.checkRange(refRange))) # Testing checkRange func
+#     print("Verse Valid: " + str(ml1.isVerseInRange(verse, refRange))) # Testing checkRange func
