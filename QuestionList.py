@@ -1,8 +1,9 @@
 ###################################################################################################
-# Name        : QuizMaker.py
+# Name        : QuestionList.py
 # Author(s)   : Chris Lloyd, Andrew Southwick
-# Description : A program to create quizzes
+# Description : Classes to store and manage questions
 ###################################################################################################
+
 
 class Question:
     """
@@ -44,39 +45,17 @@ class Question:
         self.questionAnswer = qAnswer
 
 
-class Chapter:
-    """
-    A class to store the attributes of a chapter of references.
-
-    Attributes:
-        chapterBook (str): The book of chapter.
-        chapterChapter (str): The chapter of chapter.
-        chapterVerses (array of str): The verses of chapter
-    """
-
-    def __init__(self, cBook, cChapter):
-        """
-        The constructor for class Chapter.
-
-        Parameters:
-            cBook(str): The book of chapter.
-            cChapter(str): The chapter of chapter.
-        """
-
-        self.chapterBook = cBook
-        self.chapterChapter = cChapter
-        self.chapterVerses = []
-
-
 class QuestionList:
     """
     A class to store the questions and perform functions on them.
 
     Attributes:
         questionDatabase (array of Question): The array that stores all of the questions.
+        isGospel (bool): Variable to store whether year is a gospel or not.
     """
 
-    questionDatabase = [] # The array that stores all of the material chapters
+    questionDatabase = []  # The array that stores all of the questions
+    isGospel = 0  # Variable to store whether year is a gospel or not
 
     def __init__(self, questionFileName = "questions.txt"):
         """
@@ -97,29 +76,31 @@ class QuestionList:
             questionFileName (str): The input filename for questions.
         """
 
-        questionFile = open(questionFileName, "r", encoding = "latin-1") # Open the file for reading
-        #next(questionFile) # CDL=> Should we assume there is a header row?
+        questionFile = open(questionFileName, "r", encoding = "latin-1")
+        # next(questionFile) # CDL=> Should we assume there is a header row?
 
         # For each line in file, place into proper question object
         for question in questionFile:
             fields = question.split("$")
             if fields[0] != "":
                 fields[0] = self.alphaCodeToDigitCode(fields[0])
+            if "sit" in fields[5].lower():
+                self.isGospel = 1
             questionObj = Question(fields[0], fields[1], fields[2],
                                    fields[3], fields[4], fields[5], fields[6], fields[7])
             self.questionDatabase.append(questionObj)
-        questionFile.close() # Close the file
-        self.generateCodes() # Add unique codes to those that do not have them
-    
+        questionFile.close()
+        self.generateCodes()  # Add unique codes to those that do not have them
+
     def exportQuestions(self, questionFileName):
         """
         Function to export questions from QuestionList object.
 
         Parameters:
-            questionFileName (str): The input filename for questions.
+            questionFileName (str): The output filename for questions.
         """
 
-        questionFile = open(questionFileName, "w", encoding = "latin-1")  # Open the file for writing
+        questionFile = open(questionFileName, "w")  # Open the file for writing
 
         # For each question in question list, write back out to file
         for question in self.questionDatabase:
@@ -132,7 +113,7 @@ class QuestionList:
             line += question.questionQuestion + "$"
             line += question.questionAnswer
             questionFile.write(line)
-        questionFile.close() # Close the file
+        questionFile.close()
 
     def generateCodes(self):
         """
@@ -150,7 +131,7 @@ class QuestionList:
         if largestCode == -1:
             largestCode = 0
         else:
-             largestCode = self.incrementCode(largestCode)
+            largestCode = self.incrementCode(largestCode)
 
         # Assign codes to any questions that do not have one yet
         for question in self.questionDatabase:
@@ -174,7 +155,7 @@ class QuestionList:
         formatCode = '0' + str(numberOfBits) + 'b'
         binNum = format(decNum, formatCode)
         return binNum
-    
+
     def binToDec(self, binNum):
         """
         Helper func that takes as an input a binary number and converts it to a decimal number.
@@ -185,11 +166,11 @@ class QuestionList:
         Returns:
             decNum (int): The result of conversion.
         """
-    
+
         binNum = str(binNum)
         decNum = int(binNum, 2)
         return decNum
-    
+
     def alphaCodeToDigitCode(self, alphaCode):
         """
         Function to convert from "AAA" alpha code to a decimal number.
@@ -200,13 +181,13 @@ class QuestionList:
         Returns:
             digitCode (int): The result of conversion.
         """
-    
+
         asciiNums = [(ord(c) - 97) for c in alphaCode]
         binaryCode = (str(self.decToBin(asciiNums[0], 5)) +
                       str(self.decToBin(asciiNums[1], 5)) + str(self.decToBin(asciiNums[2], 5)))
         digitCode = self.binToDec(binaryCode)
         return digitCode
-    
+
     def digitCodeToAlphaCode(self, digitCode):
         """
         Function to convert from decimal number to an "AAA" alpha code.
@@ -263,138 +244,4 @@ class QuestionList:
                       str(self.decToBin(separateDecNums[1], 5)) + str(self.decToBin(separateDecNums[2], 5)))
         digitCode = self.binToDec(binaryCode)
         return digitCode
-
-
-class MaterialList:
-    """
-    A class to store the material and perform operations on it.
-
-    Attributes:
-        materialRange (array of Chapter objects): An array to store the material references data.
-    """
-
-    materialRange = [] # An array to store the material references data
-
-    def __init__(self, materialFileName = "material.csv"):
-        """
-        The constructor for class MaterialList.
-
-        Parameters:
-            materialFileName (str): The input filename for material, defaults to "material.csv".
-        """
-
-        self.importMaterial(materialFileName)
-
-    def importMaterial(self, materialFileName):
-        """
-        Function to import and store material.
-
-        Parameters:
-           materialFileName (str): The input filename for material.
-        """
-
-        materialFile = open(materialFileName, "r", encoding = "latin-1") # Open the file for reading
-
-        # For each line in file, place into proper Chapter object
-        for chapter in materialFile:
-            chapter = chapter.rstrip()
-            fields = chapter.split(",")
-            materialObj = Chapter(fields[0], fields[1])
-            for verse in fields[2:]:
-                materialObj.chapterVerses.append(verse)
-            self.materialRange.append(materialObj)
-        materialFile.close() # Close the file
-
-    def printMaterial(self):
-        """
-        Function print material.
-        """
-
-        for chapter in self.materialRange:
-            verses = ",".join(chapter.chapterVerses)
-            print(chapter.chapterBook + " " + chapter.chapterChapter + ": " + verses)
-
-    def checkRange(self, arrayOfRanges):
-        """
-        Function to validate multiple ranges.
-
-        Parameters:
-            arrayOfRanges (array of str): Input ranges to be validated.
-
-        Returns:
-            (bool): True or False output indicating result of check
-        """
-
-        for refRange in arrayOfRanges:
-
-            # Check to make sure all references are valid
-            refRange = refRange.split("-")
-            startRef = refRange[0].split(",")
-            endRef = refRange[1].split(",")
-            if not self.checkRef(startRef):
-                return False
-            if not self.checkRef(endRef):
-                return False
-
-            # Check to make sure all ranges are valid
-            i = 0
-            for chapter in self.materialRange:
-                if startRef[0] == chapter.chapterBook and startRef[1] == chapter.chapterChapter:
-                    startIndex = i
-
-                if endRef[0] == chapter.chapterBook and endRef[1] == chapter.chapterChapter:
-                    endIndex = i
-                i += 1
-            if startIndex > endIndex:
-                return False
-
-            elif startIndex == endIndex:
-                if int(startRef[2]) > int(endRef[2]):
-                    return False
-
-        return True # Return True if ranges are not invalid
-
-    def checkRef(self, reference):
-        """
-        Function to validate a reference.
-
-        Parameters:
-            reference (array of str): Input reference to be validated.
-
-        Returns:
-            (bool): True or False output indicating result of check
-        """
-
-        for chapter in self.materialRange:
-            if reference[0] == chapter.chapterBook and reference[1] == chapter.chapterChapter:
-                for verse in chapter.chapterVerses:
-                    if verse == reference[2]:
-                        return True
-        return False
-
-
-if __name__ == "__main__":
-
-    # Example help functions
-    # help(Question)
-    # help(Chapter)
-    # help(QuestionList)
-    # help(MaterialList)
-
-    ql1 = QuestionList() # Create an object of type QuestionList
-    ml1 = MaterialList() # Create an object of type QuestionList
-
-    # refRange = ["1 Corinthians,1,1-2 Corinthians,1,1"] # Test range for checkRange func
-    # print("Range Valid: " + str(ml1.checkRange(refRange))) # Testing checkRange func
-    # ml1.printMaterial()  # Print the Material list to ensure it is working
-
-
-# Extra functions and data for later
-
-# configFilename = "config.csv"
-
-#def importQuizConfig(self, configFilename)
-#    configFile = open(configFilename, "r", encoding = "latin-1")
-#    for line in configFile:
-#        line.rstrip()
-#    configFile.close()
+    # CDL=> Add print function
