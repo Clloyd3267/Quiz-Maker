@@ -176,6 +176,7 @@ class ConfigFile(Frame):
     def OnClick(self):
         main(GridDemo())
 
+
     def CheckSit(self, SIT, SitMin, SitMax):
         if SIT.get() == 2:
             SitMin.configure(state='disabled')
