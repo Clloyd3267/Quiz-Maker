@@ -12,7 +12,7 @@ from tkinter import filedialog
 
 
 class GridDemo(Frame):
-    def __init__(self):
+    def __init__(self, master):
         tk.Frame.__init__(self)
         self.master.title("Grid Demo")
 
@@ -21,8 +21,10 @@ class GridDemo(Frame):
         self.grid(sticky='nwse')
 
         Button(self, text="Quiz-Maker Configuration",
-               command=ConfigFile).grid(row=2, column=1, columnspan=2, sticky='N', )
-
+               command=lambda: self.OnClick(master)).grid(row=2, column=1, columnspan=2, sticky='N', )
+    def OnClick(self, master):
+        master.destroy()
+        main(ConfigFile)
 
 class ConfigFile(Frame):
     def __init__(self, master):
@@ -137,8 +139,8 @@ class ConfigFile(Frame):
         Checkbutton(text="Include A's and B's", variable=self.Check).grid(row=3, column=4, sticky=W, )
 
 
-        Button(text="SAVE", command=lambda: self.OnClick()).grid(row=8, column=3, sticky=E)
-        Button(text="Cancel", command=lambda: self.OnClick()).grid(row=8, column=4, sticky=W)
+        Button(text="SAVE", command=lambda: self.OnClick(master)).grid(row=8, column=3, sticky=E)
+        Button(text="Cancel", command=lambda: self.OnClick(master)).grid(row=8, column=4, sticky=W)
 
         self.OnTotal(IntMin, IntMax, MaMin, MaMax,
                  QMin, QMax, FtvMin, FtvMax, CvrMin, CvrMax,
@@ -152,29 +154,35 @@ class ConfigFile(Frame):
         Check = Check.get()
         if AB == 1:
             AB = Num
-        print(Num)
         Min = 0
         Max = 0
         Min = IntMin.get()+MaMin.get()+QMin.get()+FtvMin.get()+CvrMin.get()+CrMin.get()+SitMin.get()
         Max = IntMax.get()+MaMax.get()+QMax.get()+FtvMax.get()+CvrMax.get()+CrMax.get()+SitMax.get()
+        MinLabel = Label(text=Min)
+        MinLabel.grid(row=8, column=1, sticky=N)
+        MaxLabel = Label(text=Max)
+        MaxLabel.grid(row=8, column=2, sticky=N)
         if Min <= AB:
-            Label(text=Min, fg='green').grid(row=8, column=1, sticky=N)
+            MinLabel.config(fg='green')
         else:
-            Label(text=Min, fg='red').grid(row=8, column=1, sticky=N)
+            MinLabel.config(fg='red')
+
+
 
         if Check == 1:
             if Max >= AB+10:
-                Label(text=Max, fg='green').grid(row=8, column=2, sticky=N)
+                MaxLabel.config(fg='green')
             else:
-                Label(text=Max, fg='red').grid(row=8, column=2, sticky=N)
+                MaxLabel.config(fg='red')
         else:
             if Max >= AB:
-                Label(text=Max, fg='green').grid(row=8, column=2, sticky=N)
+                MaxLabel.config(fg='green')
             else:
-                Label(text=Max, fg='red').grid(row=8, column=2, sticky=N)
+                MaxLabel.config(fg='red')
 
-    def OnClick(self):
-        main(GridDemo())
+    def OnClick(self, master):
+        master.destroy()
+        main(GridDemo)
 
 
     def CheckSit(self, SIT, SitMin, SitMax):
@@ -196,11 +204,11 @@ class ConfigFile(Frame):
 
 
 def main(Name):
-    Name.mainloop()
-
-
-if __name__ == "__main__":
     app = Tk()
     app.minsize(600, 300)
     app.resizable(False, False)
-    main(ConfigFile(app))
+    Name(app).mainloop()
+
+
+if __name__ == "__main__":
+    main(ConfigFile)
