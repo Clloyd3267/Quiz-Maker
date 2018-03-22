@@ -25,7 +25,7 @@ class GridDemo(Frame):
 
 
 class ConfigFile(Frame):
-    def __init__(self):
+    def __init__(self, master):
         tk.Frame.__init__(self)
 
         #      SPECIALTIES = ["INT","MA" "Q",
@@ -44,6 +44,7 @@ class ConfigFile(Frame):
         Label(text='CVR:').grid(sticky='E', row=5)
         Label(text='CR:').grid(sticky='E', row=6)
         Label(text='SIT:').grid(sticky='E', row=7)
+        Label(text="Total:").grid(sticky='E', row=8)
 
         # The Min and Max Labels
         Label(text="Min").grid(sticky='N', row=0, column=1)
@@ -100,9 +101,13 @@ class ConfigFile(Frame):
               textvariable=SitMax).grid(sticky='N', row=7, column=2, padx=20, pady=5)
 
 
-        Button(text="Total", command=lambda: self.OnTotal(
-            IntMin, IntMax, MaMin, MaMax, QMin, QMax, FtvMin, FtvMax,
-            CvrMin, CvrMax, CrMin, CrMax, SitMin, SitMax,)).grid(row=8, column=0,)
+        master.bind("<Tab>", lambda e: self.OnTotal(IntMin, IntMax, MaMin, MaMax,
+                                             QMin, QMax, FtvMin, FtvMax, CvrMin, CvrMax,
+                                                CrMin, CrMax, SitMin, SitMax, self.AB, self.Check, self.Num2))
+
+        master.bind("<Return>", lambda e: self.OnTotal(IntMin, IntMax, MaMin, MaMax,
+                                             QMin, QMax, FtvMin, FtvMax, CvrMin, CvrMax,
+                                                CrMin, CrMax, SitMin, SitMax, self.AB, self.Check, self.Num2))
 
         #Label(text=var).grid(row=8, column=1)
 
@@ -110,7 +115,8 @@ class ConfigFile(Frame):
         # Entry to grab # of questions wanted in quiz
         # NOTE: for variables to go through functions,
         # you must separate grid from main variable
-        Num = Entry(width=5, state='disabled', )
+        self.Num2 = IntVar(value=0)
+        Num = Entry(width=5, state='disabled', textvariable=self.Num2)
         Num.grid(row=2, column=5, sticky=E)
         self.AB = IntVar(value=20)
 
@@ -120,11 +126,11 @@ class ConfigFile(Frame):
 
         # R-Buttons for how many questions they want in the quiz.
         Radiobutton(text="20 Question Quiz", variable=self.AB, value=20,
-                    command=lambda: self.ABCheck(self.AB, Num)).grid(row=0, column=4, sticky=W)
+                    command=lambda: self.ABCheck(self.AB, Num,self.Num2)).grid(row=0, column=4, sticky=W)
         Radiobutton(text="15 Question Quiz", variable=self.AB, value=15,
-                    command=lambda: self.ABCheck(self.AB, Num)).grid(row=1, column=4, sticky=W)
+                    command=lambda: self.ABCheck(self.AB, Num, self.Num2)).grid(row=1, column=4, sticky=W)
         Radiobutton(text="Define # Of Questions:", variable=self.AB, value=1,
-                    command=lambda: self.ABCheck(self.AB, Num)).grid(row=2, column=4, sticky=W)
+                    command=lambda: self.ABCheck(self.AB, Num, self.Num2)).grid(row=2, column=4, sticky=W)
 
         # Checkbutton for whether ppl want A's and B's
         self.Check = IntVar(value=True)
@@ -134,18 +140,42 @@ class ConfigFile(Frame):
         Button(text="SAVE", command=lambda: self.OnClick()).grid(row=8, column=3, sticky=E)
         Button(text="Cancel", command=lambda: self.OnClick()).grid(row=8, column=4, sticky=W)
 
+        self.OnTotal(IntMin, IntMax, MaMin, MaMax,
+                 QMin, QMax, FtvMin, FtvMax, CvrMin, CvrMax,
+                 CrMin, CrMax, SitMin, SitMax, self.AB, self.Check, self.Num2)
+
+
     def OnTotal(self, IntMin, IntMax, MaMin, MaMax, QMin, QMax, FtvMin, FtvMax,
-            CvrMin, CvrMax, CrMin, CrMax, SitMin, SitMax,):
+            CvrMin, CvrMax, CrMin, CrMax, SitMin, SitMax, AB, Check, Num):
+        Num = Num.get()
+        AB = AB.get()
+        Check = Check.get()
+        if AB == 1:
+            AB = Num
+        print(Num)
         Min = 0
         Max = 0
         Min = IntMin.get()+MaMin.get()+QMin.get()+FtvMin.get()+CvrMin.get()+CrMin.get()+SitMin.get()
         Max = IntMax.get()+MaMax.get()+QMax.get()+FtvMax.get()+CvrMax.get()+CrMax.get()+SitMax.get()
-        Label(text=Min).grid(row=8, column=1, sticky=N)
-        Label(text=Max).grid(row=8, column=2, sticky=N, padx=20)
+        if Min <= AB:
+            Label(text=Min, fg='green').grid(row=8, column=1, sticky=N)
+        else:
+            Label(text=Min, fg='red').grid(row=8, column=1, sticky=N)
 
+        if Check == 1:
+            if Max >= AB+10:
+                Label(text=Max, fg='green').grid(row=8, column=2, sticky=N)
+            else:
+                Label(text=Max, fg='red').grid(row=8, column=2, sticky=N)
+        else:
+            if Max >= AB:
+                Label(text=Max, fg='green').grid(row=8, column=2, sticky=N)
+            else:
+                Label(text=Max, fg='red').grid(row=8, column=2, sticky=N)
 
     def OnClick(self):
         main(GridDemo())
+
 
     def CheckSit(self, SIT, SitMin, SitMax):
         if SIT.get() == 2:
@@ -156,12 +186,13 @@ class ConfigFile(Frame):
             SitMax.configure(state='normal')
 
     # check to see if we need to change the entry widget's state
-    def ABCheck(self, AB, Num):
+    def ABCheck(self, AB, Num, Num2):
         if AB.get() == 1:
             Num.configure(state='normal')
         else:
             Num.configure(state='disabled')
-
+            Num2 = 0
+            return Num2
 
 
 def main(Name):
@@ -172,4 +203,4 @@ if __name__ == "__main__":
     app = Tk()
     app.minsize(600, 300)
     app.resizable(False, False)
-    main(ConfigFile())
+    main(ConfigFile(app))
