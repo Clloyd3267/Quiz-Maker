@@ -15,7 +15,7 @@ class Config:
         isAAndB (str): Whether or not to have A's and B's.
         randAB (str): Whether or not A's and B's are random.
         sameAB (str): Whether or not A's and B's are the same as numbered question.
-        typeMinMax (array of arrays of str): Min and Max data for configuration. (see table below for more info)
+        typeMinMax (dict of arrays of str): Min and Max data for configuration. (see table below for more info)
 
     Structure of typeMinMax:
         MINMA,  MAXMA
@@ -97,10 +97,13 @@ class ConfigList:
             file = open(fileName, "r")
             line1 = (file.readline()).rstrip()
             line1 = line1.split(",")
-            typeMinsAndMaxs = []
+            typeMinsAndMaxs = {}
+            questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
+            i = 0
             for line in file:
                 line = line.rstrip()
-                typeMinsAndMaxs.append(line.split(","))
+                typeMinsAndMaxs[questionTypes[i]] = line.split(",")
+                i += 1
             self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1], line1[2], line1[3], typeMinsAndMaxs)
             file.close()
 

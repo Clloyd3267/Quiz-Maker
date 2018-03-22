@@ -34,7 +34,7 @@ class MaterialList:
     A class to store the material and perform operations on it.
 
     Attributes:
-        materialRange (array of array of str): An array to store the material references data.
+        materialRange (array of str): An array to store the material references data.
     """
 
     materialRange = [] # An array to store the material references data
@@ -59,7 +59,7 @@ class MaterialList:
 
         materialFile = open(materialFileName, "r")
 
-        # For each line in file, place into proper Chapter object
+        # For each verse in object append to materialRange
         for chapter in materialFile:
             chapter = chapter.rstrip()
             fields = chapter.split(",")

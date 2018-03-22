@@ -35,6 +35,7 @@ class Question:
             qAnswer (str): The answer to question.
         """
 
+        self.questionNumber = ""
         self.questionCode = qCode
         self.questionBook = qBook
         self.questionChapter = qChapter
@@ -43,6 +44,20 @@ class Question:
         self.questionType = qType
         self.questionQuestion = qQuestion
         self.questionAnswer = qAnswer
+
+    def printQuestion(self):
+        qStr = "    "
+        # qStr += str(self.questionNumber) + ","
+        # qStr += str(self.questionCode) + ","
+        qStr += str(self.questionBook) + ","
+        qStr += str(self.questionChapter) + ","
+        qStr += str(self.questionVerseStart) + ","
+        # qStr += str(self.questionVerseEnd) + ","
+        qStr += str(self.questionType) + ","
+        qStr += str(self.questionQuestion) + ","
+        qStr += str(self.questionAnswer)
+        qStr = qStr.rstrip("\r\n")
+        print(qStr)
 
 
 class QuestionList:
@@ -84,6 +99,10 @@ class QuestionList:
             fields = question.split("$")
             if fields[0] != "":
                 fields[0] = self.alphaCodeToDigitCode(fields[0])
+            if "-" in fields[3]:
+                verseRange = fields[3].split("-")
+                fields[3] = verseRange[0]
+                fields[4] = verseRange[1]
             if "sit" in fields[5].lower():
                 self.isGospel = 1
             questionObj = Question(fields[0], fields[1], fields[2],
