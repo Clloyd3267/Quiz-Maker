@@ -4,31 +4,6 @@
 # Description : Classes to store and manage material references
 ###################################################################################################
 
-#
-# class Chapter:
-#     """
-#     A class to store the attributes of a chapter of references.
-#
-#     Attributes:
-#         chapterBook (str): The book of chapter.
-#         chapterChapter (str): The chapter of chapter.
-#         chapterVerses (array of str): The verses of chapter.
-#     """
-#
-#     def __init__(self, cBook, cChapter):
-#         """
-#         The constructor for class Chapter.
-#
-#         Parameters:
-#             cBook (str): The book of chapter.
-#             cChapter (str): The chapter of chapter.
-#         """
-#
-#         self.chapterBook = cBook
-#         self.chapterChapter = cChapter
-#         self.chapterVerses = []
-
-
 class MaterialList:
     """
     A class to store the material and perform operations on it.

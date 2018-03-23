@@ -15,6 +15,7 @@ class Config:
         isAAndB (str): Whether or not to have A's and B's.
         randAB (str): Whether or not A's and B's are random.
         sameAB (str): Whether or not A's and B's are the same as numbered question.
+        intWeight (str): The weight of INTs for each quiz.
         typeMinMax (dict of arrays of str): Min and Max data for configuration. (see table below for more info)
 
     Structure of typeMinMax:
@@ -26,7 +27,7 @@ class Config:
         MINSIT, MAXSIT
     """
 
-    def __init__(self, cConfigName, cNumberOfQuestions, cIsAAndB, cRandAB, cSameAB, cTypeMinMax):
+    def __init__(self, cConfigName, cNumberOfQuestions, cIsAAndB, cRandAB, cSameAB, cIntWeight, cTypeMinMax):
         """
         The constructor for class config.
 
@@ -36,6 +37,7 @@ class Config:
             cIsAAndB (str): Whether or not to have A's and B's.
             cRandAB (str): Whether or not A's and B's are random.
             cSameAB (str): Whether or not A's and B's are the same as numbered question.
+            cIntWeight (str): The weight of INTs for each quiz.
             cTypeMinMax (array of arrays of str): Min and Max data for configuration.
         """
 
@@ -44,6 +46,7 @@ class Config:
         self.isAAndB = cIsAAndB
         self.randAB = cRandAB
         self.sameAB = cSameAB
+        self.intWeight = cIntWeight
         self.typeMinMax = cTypeMinMax
 
 
@@ -52,11 +55,10 @@ class ConfigList:
     A class to store the config files and perform operations on it.
 
     Attributes:
-        configFileNames (array of str): An array to store config filenames.
         configList (array of config objects): An array to store the config data.
     """
 
-    configList = {} # The array of config data objects
+    configList = {} # The dict of config data objects
 
     def __init__(self, configFileName = "QuizMakerConfig.csv"):
         """
@@ -104,7 +106,8 @@ class ConfigList:
                 line = line.rstrip()
                 typeMinsAndMaxs[questionTypes[i]] = line.split(",")
                 i += 1
-            self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1], line1[2], line1[3], typeMinsAndMaxs)
+            self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1],
+                                                    line1[2], line1[3], line1[4], typeMinsAndMaxs)
             file.close()
 
     def printConfigData(self):
@@ -116,16 +119,12 @@ class ConfigList:
             print("=====================================")
             print("Config Data for: " + self.configList[config].configName)
             print("Number of Questions: " + self.configList[config].numberOfQuestions)
-            print("Are there A'[s and B's: " + self.configList[config].isAAndB)
+            print("Are there A's and B's: " + self.configList[config].isAAndB)
             if self.configList[config].randAB == "1" and self.configList[config].sameAB == "0":
                 aBType = "Random"
             elif self.configList[config].sameAB == "1" and self.configList[config].randAB == "0":
                 aBType = "Same as numbered question"
-            else:
-                print(self.configList[config].randAB)
-                print(self.configList[config].sameAB)
-                aBType = "Error!!!"
-                print("File Error!!!")
+            print("INT weight: " + str(self.configList[config].intWeight))
             print("A's and B's question type: " + aBType)
             print("    Min, Max")
             print("Ma:  " + self.configList[config].typeMinMax[0][0] + ",   " + self.configList[config].typeMinMax[0][1])
@@ -135,11 +134,11 @@ class ConfigList:
             print("FTV: " + self.configList[config].typeMinMax[4][0] + ",   " + self.configList[config].typeMinMax[4][1])
             print("SIT: " + self.configList[config].typeMinMax[5][0] + ",   " + self.configList[config].typeMinMax[5][1])
             print("=====================================")
-    # def exportConfigFiles(self, configFileName): # CDL=> To be implemented
+    # def exportConfigFiles(self, configFileName):
     #     """
     #     Function to export config data.
     #
     #     Parameters:
     #         configFileName (str): The output file name of program config data.
     #     """
-    # CDL=> Add addConfig function
+    # CDL=> Add addConfig and editConfig and exportConfigFiles functions
