@@ -3,32 +3,73 @@
 # Author(s)   : Chris Lloyd, Andrew Southwick
 # Description : A program to create quizzes
 ###################################################################################################
-import time
-import random
+
+# External Imports
+import xlsxwriter # Used to write quizzes to excel files
+import time # Used to time exception speed
+import random # Used for random numbers and random choice
+
+# Project Imports
 from QuestionList import *
 from MaterialList import *
 from ConfigList import *
-start_time = time.time()
+
+start_time = time.time() # Start a timer
 
 class Quiz:
+    """
+    A class to store the attributes of a quiz.
+
+    Attributes:
+        questions (array of question obj): An array to store the questions.
+    """
+
     def __init__(self):
-        self.questions = []
+        """
+        The constructor for class Quiz.
+        """
+
+        self.questions = [] # An array to store the questions
 
     def printQuiz(self):
+        """
+        Function to print the quizzes.
+        """
+
         for question in self.questions:
             question.printQuestion()
 
-    def addQuestion(self, qQuestion):
-        self.questions.append(qQuestion)
-
 
 class QuizMaker:
+    """
+    A class to perform the high level functions in quiz creation.
+
+    Attributes:
+        ql (QuestionList): Object of type QuestionList.
+        ml (MaterialList): Object of type MaterialList.
+        cl (ConfigList): Object of type ConfigList.
+    """
+
     def __init__(self):
+        """
+        The constructor for class QuizMaker.
+        """
+
         self.ql = QuestionList()  # Create an object of type QuestionList
         self.ml = MaterialList()  # Create an object of type MaterialList
         self.cl = ConfigList()    # Create an object of type ConfigList
 
     def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, isExtraQuestions):
+        """
+        Function to generate quizzes.
+
+        Parameters:
+            numQuizzes (int): The number of quizzes wanted.
+            arrayOfRanges (array of str): Ranges to use for quiz generation.
+            configDataName (str): Name of config data file.
+            isExtraQuestions (bool): Whether extra questions are wanted.
+        """
+        # CDL=> Fix error with MA vs CRMA???
 
         # Error Checking
         if numQuizzes <= 0:
@@ -89,8 +130,6 @@ class QuizMaker:
                     # Select a question from unused pile
                     elif allValidQuestions[randomQType]:
                         selectedQuestion = random.choice(allValidQuestions[randomQType])
-                        questionIndex = allValidQuestions[randomQType].index(selectedQuestion)
-                        selectedQuestion = allValidQuestions[randomQType][questionIndex]
                         allValidQuestions[randomQType].remove(selectedQuestion)
                         usedQuestions[randomQType].append(selectedQuestion)
                     # Select a question from used pile
@@ -98,7 +137,7 @@ class QuizMaker:
                         selectedQuestion = random.choice(usedQuestions[randomQType])
 
                     # Add question and iterate variables
-                    quiz.addQuestion(selectedQuestion)
+                    quiz.questions.append(selectedQuestion)
                     questionTypesUsed[randomQType] += 1
                     questionPicked = True
                     questionNum += 1
@@ -120,8 +159,6 @@ class QuizMaker:
                     # Select a question from unused pile
                     elif allValidQuestions[randomQType]:
                         selectedQuestion = random.choice(allValidQuestions[randomQType])
-                        questionIndex = allValidQuestions[randomQType].index(selectedQuestion)
-                        selectedQuestion = allValidQuestions[randomQType][questionIndex]
                         allValidQuestions[randomQType].remove(selectedQuestion)
                         usedQuestions[randomQType].append(selectedQuestion)
                     # Select a question from used pile
@@ -129,27 +166,107 @@ class QuizMaker:
                         selectedQuestion = random.choice(usedQuestions[randomQType])
 
                     # Add question and iterate variables
-                    quiz.addQuestion(selectedQuestion)
+                    quiz.questions.append(selectedQuestion)
                     questionPicked = True
                     questionTypesUsed[randomQType] += 1
                     questionNum += 1
 
             random.shuffle(quiz.questions) # Shuffle the numbered questions
+
+            # Add question numbers to the non A and B questions
+            questionNum = 1
+            for question in quiz.questions:
+                question.questionNumber = str(questionNum)
+                questionNum += 1
+            # Array to hold question types
+            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+            # Check to see if year is a gospel
+            if self.ql.isGospel:
+                allQuestionTypes.append("SIT")
+
+            questionNum = 1 # Iterator for question number
+            questionIndex = 0 # Iterator for question index
+            # Loop to fill A and B questions if any
+            while questionNum != int(self.cl.configList[configDataName].numberOfQuestions) + 1:
+                # If an A and B questions are needed
+                if questionNum >= 16  and self.cl.configList[configDataName].isAAndB:
+
+                    # If A and B questions should be filled using the same as the numbered question
+                    if self.cl.configList[configDataName].sameAB == "1":
+                        for qType in allQuestionTypes:
+                            if quiz.questions[questionIndex].questionType.find(qType) != -1:
+                                for subLetter in ["A", "B"]:
+                                    # Select a question from unused pile
+                                    if allValidQuestions[qType]:
+                                        selectedQuestion = random.choice(allValidQuestions[qType])
+                                        allValidQuestions[qType].remove(selectedQuestion)
+                                        usedQuestions[qType].append(selectedQuestion)
+                                    # Select a question from used pile
+                                    else:
+                                        selectedQuestion = random.choice(usedQuestions[qType])
+
+                                    selectedQuestion.questionNumber = str(questionNum) + subLetter
+                                    if subLetter == "A":
+                                        quiz.questions.insert(questionIndex + 1, selectedQuestion)
+                                    elif subLetter == "B":
+                                        quiz.questions.insert(questionIndex + 2, selectedQuestion)
+
+                    # If A and B questions should be filled using a random question type
+                    if self.cl.configList[configDataName].randAB == "1":
+                        for subLetter in ["A", "B"]:
+                            questionPicked = False  # Var to track if a question has been picked
+                            while not questionPicked:
+                                # Pick a random type of question
+                                randomQType = random.choice(allQuestionTypes)
+                                # Check to see if question type has met it's maximum
+                                if randomQType != "INT" and int(questionTypesUsed[randomQType]) == int(
+                                    self.cl.configList[configDataName].typeMinMax[randomQType][1]):
+                                    allQuestionTypes.remove(randomQType)
+                                    continue
+                                # Select a question from unused pile
+                                elif allValidQuestions[randomQType]:
+                                    selectedQuestion = random.choice(allValidQuestions[randomQType])
+                                    allValidQuestions[randomQType].remove(selectedQuestion)
+                                    usedQuestions[randomQType].append(selectedQuestion)
+                                # Select a question from used pile
+                                else:
+                                    selectedQuestion = random.choice(usedQuestions[randomQType])
+
+                                selectedQuestion.questionNumber = str(questionNum) + subLetter
+                                if subLetter == "A":
+                                    quiz.questions.insert(questionIndex + 1, selectedQuestion)
+                                elif subLetter == "B":
+                                    quiz.questions.insert(questionIndex + 2, selectedQuestion)
+                                questionPicked = True
+                                questionTypesUsed[randomQType] += 1
+                    questionIndex += 3 # Increment question index
+                else:
+                    questionIndex += 1 # Increment question index
+                questionNum += 1 # Increment question number
             quizzes.append(quiz) # Add the quiz to the list of quizzes
             quizNum += 1 # Increment quiz number
-        self.debugQuizGen(quizzes, configDataName)
 
-        # Make an array of question numbers to loop through
-        # for i in range(1, self.cl.configList[configDataName].numberOfQuestions + 1):
-        #     if i >= 16 and self.cl.configList[configDataName].isAAndB:
-        #         questionNums.append(str(i))
-        #         questionNums.append(str(i) + "A")
-        #         questionNums.append(str(i) + "B")
-        #     else:
-        #         questionNums.append(str(i))
+        self.debugQuizGen(quizzes, configDataName) # Function to debug quizzes
 
+        # workbook = xlsxwriter.Workbook('hello.xlsx')
+        # worksheet = workbook.add_worksheet()
+        # cell_format1 = workbook.add_format({'bold': True, 'font_color': 'red', 'align': 'center_across'})
+        # i = 1
+        # for question in quizzes[0].questions:
+        #     worksheet.write("A" + str(i), question.questionNumber, cell_format1)
+        #     i += 1
+        #
+        # workbook.close()
 
     def debugQuizGen(self, quizzes, configDataName):
+        """
+        Function to debug quizzes.
+
+        Parameters:
+            quizzes (array of quiz): All of the quizzes to be debugged.
+            configDataName (str): Name of config data file.
+        """
+
         numNextToEachOther = {"MA":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
         allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
         if self.ql.isGospel:
@@ -157,7 +274,6 @@ class QuizMaker:
             allQuestionTypes.append("SIT")
 
         for quiz in quizzes:
-            # print(len(quiz.questions))
             questionNum = 0
             while questionNum != int(self.cl.configList[configDataName].numberOfQuestions) - 1:
                 for qType in allQuestionTypes:
@@ -172,6 +288,18 @@ class QuizMaker:
         print("Total:",total)
 
     def minMet(self, configDataName, questionTypesUsed):
+        """
+        Function to check if min is met for all questions.
+
+        Parameters:
+            configDataName (str): Name of config data file.
+            questionTypesUsed (dict): Number of times each type of question was used.
+
+        Returns:
+            True (bool): Min has been met.
+            False (bool): Min has not been met.
+        """
+
         for key in list(questionTypesUsed.keys()):
             if key == "INT":
                 continue
@@ -180,6 +308,16 @@ class QuizMaker:
         return True
 
     def findValidQuestions(self, arrayOfRanges):
+        """
+        Function to find all valid questions in range.
+
+        Parameters:
+            arrayOfRanges (array of str): Ranges to search for questions in.
+
+        Returns:
+            validQuestions (dict): All valid questions within the range.
+        """
+
         validQuestions = {"INT":[],"MA":[], "CR":[], "CVR":[], "Q":[], "FTV":[]}
         types = ["INT", "MA", "CR", "CVR", "Q", "FTV"]
         if self.ql.isGospel:
@@ -197,19 +335,14 @@ class QuizMaker:
 
         return validQuestions
 
-    def printQuestions(self, validQuestions):
-        for qType in list(validQuestions.keys()):
-            print(qType)
-            for question in validQuestions[qType]:
-                question.printQuestion()
 
 if __name__ == "__main__":
-    qM = QuizMaker()
-    refRange = ["1 Corinthians,1,1-2 Corinthians,1,1"]
-    qM.generateQuizzes(1, refRange, "default", 0)
-    print("time elapsed: {:.2f}s".format(time.time() - start_time))
-
     # CDL=> clean up main funcs
+    qM = QuizMaker()                                                    # Create an object of type QuizMaker
+    refRange = ["2 Corinthians,10,1-2 Corinthians,13,14"]               # Range used as an input
+    qM.generateQuizzes(1, refRange, "default", 0)                       # Generate quizzes
+    print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
+
 
     # Example help functions
     #help(Question)

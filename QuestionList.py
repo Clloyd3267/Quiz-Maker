@@ -10,6 +10,7 @@ class Question:
     A class to store the attributes of a question.
 
     Attributes:
+        questionNumber (str): Used to store a question number.
         questionCode (int / str): The unique code of question.
         questionBook (str): The book of question.
         questionChapter (str): The chapter of question.
@@ -47,7 +48,7 @@ class Question:
 
     def printQuestion(self):
         qStr = "    "
-        # qStr += str(self.questionNumber) + ","
+        qStr += str(self.questionNumber) + ","
         # qStr += str(self.questionCode) + ","
         qStr += str(self.questionBook) + ","
         qStr += str(self.questionChapter) + ","

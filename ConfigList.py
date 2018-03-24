@@ -134,11 +134,50 @@ class ConfigList:
             print("FTV: " + self.configList[config].typeMinMax[4][0] + ",   " + self.configList[config].typeMinMax[4][1])
             print("SIT: " + self.configList[config].typeMinMax[5][0] + ",   " + self.configList[config].typeMinMax[5][1])
             print("=====================================")
-    # def exportConfigFiles(self, configFileName):
-    #     """
-    #     Function to export config data.
-    #
-    #     Parameters:
-    #         configFileName (str): The output file name of program config data.
-    #     """
-    # CDL=> Add addConfig and editConfig and exportConfigFiles functions
+
+    def exportConfigFiles(self, configFileName):
+        """
+        Function to export config data.
+
+        Parameters:
+            configFileName (str): The output file name of program config data.
+        """
+
+        # configFileNames = ["default.csv"]  # The array that stores all of the config filenames
+
+        # Write out filenames for config files
+        # configFile = open(configFileName, "w")
+        # for configName in list(self.configList.keys()):
+        #     fileName = configName + ".csv"
+        #     configFile.write(fileName)
+        #
+        #     configDataFile = open(fileName, "w")
+        #
+        #     line1 = ""
+        #     line1 += self.configList[configName].numberOfQuestions + ","
+        #     line1 += self.configList[configName].isAAndB + ","
+        #     line1 += self.configList[configName].randAB + ","
+        #     line1 += self.configList[configName].cSameAB + ","
+        #     line1 += self.configList[configName].cIntWeight + ","
+        #
+        #
+        #     configFileNames.append(line)
+        # configFile.close()
+
+        # Read in Config data from each file
+        for fileName in configFileNames:
+            file = open(fileName, "r")
+            line1 = (file.readline()).rstrip()
+            line1 = line1.split(",")
+            typeMinsAndMaxs = {}
+            questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
+            i = 0
+            for line in file:
+                line = line.rstrip()
+                typeMinsAndMaxs[questionTypes[i]] = line.split(",")
+                i += 1
+            self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1],
+                                                    line1[2], line1[3], line1[4], typeMinsAndMaxs)
+            file.close()
+
+     # CDL=> Add addConfig and editConfig and exportConfigFiles functions
