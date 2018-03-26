@@ -6,8 +6,8 @@
 
 import tkinter as tk
 from tkinter import *
-from tkinter import Frame, Tk, BOTH, Text, Menu, END, Label, Button, Entry, Radiobutton
-from tkinter import filedialog
+#from tkinter import Frame, Tk, BOTH, Text, Menu, END, Label, Button, Entry, Radiobutton
+#from tkinter import filedialog
 
 
 class MainApp(tk.Tk):
@@ -23,7 +23,7 @@ class MainApp(tk.Tk):
 
         # Create a dictonary of all of the different frame "page" objects
         self.frames = {}
-        for F in (StartPage, QuizPage, QuizPage2, ConfigFile):
+        for F in (StartPage, QuizPage, ConfigFile):
             page_name = F.__name__
             frame = F(parent = container, controller = self)
             self.frames[page_name] = frame
@@ -53,8 +53,6 @@ class StartPage(tk.Frame):
 
         Button(self, text = "Quiz Generating Page",
                     command = lambda: controller.show_frame("QuizPage")).grid()
-        Button(self, text="Quiz Generating Page 2",
-                            command = lambda: controller.show_frame("QuizPage2")).grid()
         Button(self, text="Configuration Page",
                             command = lambda: controller.show_frame("ConfigFile")).grid()
 
@@ -248,52 +246,40 @@ class QuizPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.parent = parent
         self.controller = controller
-        Label(self, text = "Generating Quiz Page").grid()
-        Button(self, text = "Start Page",
-                           command = lambda: controller.show_frame("StartPage")).grid()
+        Button(self, text = "Generate", height=5, width=10,
+                          command = lambda: controller.show_frame("StartPage")).grid(row=1,
+                                    column=1, columnspan=2, rowspan=2, sticky='nsew')
 
-        column = 2
-        OptionMenu(self, "hello", 1,2,3).grid(row=2, column=2)
-        OptionMenu(self, "hello", 1,2,3).grid(row=2, column=3)
-        OptionMenu(self, "hello", 1,2,3).grid(row=2, column=4)
+        Label(self, text="Number of Quizzes:").grid(row=2, column=3, columnspan=2, sticky=E)
+        Entry(self, width=5).grid(row=2, column=5, sticky=W)
 
-        Button(self, text="Add Range", command = lambda: AddRange(column)).grid(row=2, column=1)
+        global globvar
+        globvar = 3
+        DDBook = StringVar(value="Book")
+        DDChapter = StringVar(value="Chapter")
+        DDVerse = StringVar(value="Verse")
 
-        def AddRange(column):
-            column= column + 1
-            OptionMenu(self, "hello", 1, 2, 3).grid(row=column, column=2)
-            OptionMenu(self, "hello", 1, 2, 3).grid(row=column, column=3)
-            OptionMenu(self, "hello", 1, 2, 3).grid(row=column, column=4)
+        OptionMenu(self, DDBook, 1,2,3,).grid(row=3, column=4, sticky=EW)
+        OptionMenu(self, DDChapter, 1,2,3,).grid(row=3, column=5, sticky=EW)
+        OptionMenu(self, DDVerse, 1,2,3).grid(row=3, column=6, sticky=EW)
+
+        Button(self, text="Add Range",
+               command = lambda: AddRange(DDBook, DDChapter,
+                                          DDVerse)).grid(row=3, column=3, sticky=E)
+
+        def AddRange(Book, Chapter, Verse):
+            global globvar
+            globvar = globvar + 1
+            OptionMenu(self, Book, 1, 2, 3).grid(row=globvar, column=4)
+            OptionMenu(self, Chapter, 1, 2, 3).grid(row=globvar, column=5)
+            OptionMenu(self, Verse, 1, 2, 3).grid(row=globvar, column=6)
 
 
-class QuizPage2(tk.Frame):
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.parent = parent
-        self.controller = controller
-        Label(self, text = "Generating Quiz Page").grid()
-        Button(self, text = "Start Page",
-                           command = lambda: controller.show_frame("StartPage")).grid()
-
-        column = 2
-        Entry(self, width=5).grid(row=2, column=2, padx=2, pady=5)
-        Label(self, text="Corinthians").grid(row=2, column=3)
-        Entry(self, width=5).grid(row=2, column=4, padx=20, pady=5)
-        Entry(self, width=5).grid(row=2, column=5, padx=20, pady=5)
-
-        Button(self, text="Add Range", command = lambda: AddRange(column)).grid(row=2, column=1)
-
-        def AddRange(column):
-            column= column + 1
-            Entry(self, width=5).grid(row=column, column=2, padx=2, pady=5)
-            Label(self, text="Corinthians").grid(row=column, column=3)
-            Entry(self, width=5).grid(row=column, column=4, padx=20, pady=5)
-            Entry(self, width=5).grid(row=column, column=5, padx=20, pady=5)
 
 
 if __name__ == "__main__":
     app = MainApp()
-    app.minsize(600, 300)
+    app.minsize(600, 400)
     app.resizable(False, False)
     app.mainloop()
