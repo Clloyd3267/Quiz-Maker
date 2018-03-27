@@ -50,11 +50,11 @@ class StartPage(tk.Frame):
         self.controller = controller
         #label = tk.Label(self, text="This is the start page")
         #label.grid(row=0)
-
+        Listbox(self, width=70, height=25).grid(row=1, column=1, rowspan=70)
         Button(self, text = "Quiz Generating Page",
-                    command = lambda: controller.show_frame("QuizPage")).grid()
+                    command = lambda: controller.show_frame("QuizPage")).grid(row=1, column=3)
         Button(self, text="Configuration Page",
-                            command = lambda: controller.show_frame("ConfigFile")).grid()
+                            command = lambda: controller.show_frame("ConfigFile")).grid(row=2, column=3)
 
 
 
@@ -281,5 +281,5 @@ class QuizPage(tk.Frame):
 if __name__ == "__main__":
     app = MainApp()
     app.minsize(600, 400)
-    app.resizable(False, False)
+    #app.resizable(False, False)
     app.mainloop()
