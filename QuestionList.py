@@ -92,11 +92,12 @@ class QuestionList:
             questionFileName (str): The input filename for questions.
         """
 
-        questionFile = open(questionFileName, "r", encoding = "latin-1")
+        questionFile = open(questionFileName, "r", encoding = 'cp1252')
         # next(questionFile) # CDL=> Should we assume there is a header row?
 
         # For each line in file, place into proper question object
         for question in questionFile:
+            question = question.rstrip()
             fields = question.split("$")
             if fields[0] != "":
                 fields[0] = self.alphaCodeToDigitCode(fields[0])
@@ -120,7 +121,7 @@ class QuestionList:
             questionFileName (str): The output filename for questions.
         """
 
-        questionFile = open(questionFileName, "w")  # Open the file for writing
+        questionFile = open(questionFileName, "w", encoding = 'cp1252')  # Open the file for writing
 
         # For each question in question list, write back out to file
         for question in self.questionDatabase:
@@ -132,6 +133,7 @@ class QuestionList:
             line += question.questionType + "$"
             line += question.questionQuestion + "$"
             line += question.questionAnswer
+            line += "\n"
             questionFile.write(line)
         questionFile.close()
 

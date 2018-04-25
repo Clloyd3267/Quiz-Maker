@@ -75,7 +75,7 @@ class MaterialList:
 
         searchVerse = searchVerse.split(",")
         if not self.checkRange(arrayOfRanges) or not self.checkRef(searchVerse):
-            print("Error!!! verse not in range or verse doesnt exist") # CDL=> ERROR spot
+            print("Error!!! verse not in range or verse doesnt exist", searchVerse[0], searchVerse[1], searchVerse[2]) # CDL=> ERROR spot
             return False
 
         for refRange in arrayOfRanges:

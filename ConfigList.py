@@ -100,7 +100,7 @@ class ConfigList:
             line1 = (file.readline()).rstrip()
             line1 = line1.split(",")
             typeMinsAndMaxs = {}
-            questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
+            questionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "SIT"]
             i = 0
             for line in file:
                 line = line.rstrip()
@@ -165,19 +165,19 @@ class ConfigList:
         # configFile.close()
 
         # Read in Config data from each file
-        for fileName in configFileNames:
-            file = open(fileName, "r")
-            line1 = (file.readline()).rstrip()
-            line1 = line1.split(",")
-            typeMinsAndMaxs = {}
-            questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
-            i = 0
-            for line in file:
-                line = line.rstrip()
-                typeMinsAndMaxs[questionTypes[i]] = line.split(",")
-                i += 1
-            self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1],
-                                                    line1[2], line1[3], line1[4], typeMinsAndMaxs)
-            file.close()
+        # for fileName in configFileNames:
+        #     file = open(fileName, "r")
+        #     line1 = (file.readline()).rstrip()
+        #     line1 = line1.split(",")
+        #     typeMinsAndMaxs = {}
+        #     questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
+        #     i = 0
+        #     for line in file:
+        #         line = line.rstrip()
+        #         typeMinsAndMaxs[questionTypes[i]] = line.split(",")
+        #         i += 1
+        #     self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1],
+        #                                             line1[2], line1[3], line1[4], typeMinsAndMaxs)
+        #     file.close()
 
      # CDL=> Add addConfig and editConfig and exportConfigFiles functions

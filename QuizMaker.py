@@ -12,6 +12,7 @@ import random # Used for random numbers and random choice
 # Project Imports
 from QuestionList import *
 from MaterialList import *
+from UniqueList import *
 from ConfigList import *
 
 start_time = time.time() # Start a timer
@@ -28,7 +29,6 @@ class Quiz:
         """
         The constructor for class Quiz.
         """
-
         self.questions = [] # An array to store the questions
 
     def printQuiz(self):
@@ -57,6 +57,7 @@ class QuizMaker:
 
         self.ql = QuestionList()  # Create an object of type QuestionList
         self.ml = MaterialList()  # Create an object of type MaterialList
+        self.ul = UniqueList()
         self.cl = ConfigList()    # Create an object of type ConfigList
 
     def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, isExtraQuestions):
@@ -88,7 +89,7 @@ class QuizMaker:
         quizzes = [] # Array to store quizzes
 
         # Dict to track the used questions
-        usedQuestions = {"MA":[], "CR":[], "CVR":[], "Q":[], "FTV":[], "INT":[]}
+        usedQuestions = {"MAN":[], "CR":[], "CVR":[], "Q":[], "FTV":[], "INT":[]}
         # Find all questions within the range and add them to allValidQuestions dict
         allValidQuestions = self.findValidQuestions(arrayOfRanges)
 
@@ -97,9 +98,9 @@ class QuizMaker:
             quiz = Quiz() # Create a quiz object
 
             # Dict to track the number of question types used
-            questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
+            questionTypesUsed = {"MAN": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
             # Array to hold question types
-            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
+            allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV"]
             # Check to see if year is a gospel
             if self.ql.isGospel:
                 allQuestionTypes.append("SIT")
@@ -171,7 +172,11 @@ class QuizMaker:
                     questionTypesUsed[randomQType] += 1
                     questionNum += 1
 
-            random.shuffle(quiz.questions) # Shuffle the numbered questions
+            random.shuffle(quiz.questions)  # Shuffle the numbered questions
+            random.shuffle(quiz.questions)  # Shuffle the numbered questions
+            random.shuffle(quiz.questions)  # Shuffle the numbered questions
+            random.shuffle(quiz.questions)  # Shuffle the numbered questions
+            random.shuffle(quiz.questions)  # Shuffle the numbered questions
 
             # Add question numbers to the non A and B questions
             questionNum = 1
@@ -179,7 +184,7 @@ class QuizMaker:
                 question.questionNumber = str(questionNum)
                 questionNum += 1
             # Array to hold question types
-            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+            allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "INT"]
             # Check to see if year is a gospel
             if self.ql.isGospel:
                 allQuestionTypes.append("SIT")
@@ -248,15 +253,55 @@ class QuizMaker:
 
         self.debugQuizGen(quizzes, configDataName) # Function to debug quizzes
 
-        # workbook = xlsxwriter.Workbook('hello.xlsx')
-        # worksheet = workbook.add_worksheet()
-        # cell_format1 = workbook.add_format({'bold': True, 'font_color': 'red', 'align': 'center_across'})
-        # i = 1
-        # for question in quizzes[0].questions:
-        #     worksheet.write("A" + str(i), question.questionNumber, cell_format1)
-        #     i += 1
-        #
-        # workbook.close()
+        workbook = xlsxwriter.Workbook('Quizzes.xlsx')
+        worksheet = workbook.add_worksheet()
+        cell_format1 = workbook.add_format({'font_size': 10, 'text_wrap': 1, 'valign': 'top', 'border': 1})
+        bold = workbook.add_format({'bold': 1})
+
+        length_list = [3, 9, 38, 65, 12, 3, 3]
+        for i, width in enumerate(length_list):
+            worksheet.set_column(i, i, width)
+
+        i = 1
+        j = 1
+        for quiz in quizzes:
+            i += 1
+            worksheet.write("A" + str(i),"Districts Practice " + str(j))
+            i += 1
+            j += 1
+
+            for question in quiz.questions:
+                worksheet.write("A" + str(i), question.questionNumber, cell_format1)
+                if question.questionType == "MAN":
+                    typeOfQuestion = "MA"
+                else:
+                    typeOfQuestion = question.questionType
+                worksheet.write("B" + str(i), typeOfQuestion, cell_format1)
+                if question.questionType == "MA" or question.questionType == "INT":
+                    worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold, cell_format1))
+                else:
+                    worksheet.write("C" + str(i), question.questionQuestion, cell_format1)
+                worksheet.write_rich_string("D" + str(i), *self.boldUniqueWords(question.questionAnswer, bold, cell_format1))
+                worksheet.write("E" + str(i), question.questionBook, cell_format1)
+                worksheet.write("F" + str(i), question.questionChapter, cell_format1)
+                worksheet.write("G" + str(i), question.questionVerseStart, cell_format1)
+                i += 1
+
+
+        workbook.close()
+
+    def boldUniqueWords(self, myString, boldFormat, mainFormat):
+        myString = ''.join([c for c in myString if c.isalnum() or c.isspace() or (c == "-") or c == "’"])
+        result = []
+        for word in myString.split():
+            word += " "
+            if self.ul.isWordUnique(word):
+                result.append(boldFormat)
+                result.append(word)
+            else:
+                result.append(word)
+        result.append(mainFormat)
+        return result
 
     def debugQuizGen(self, quizzes, configDataName):
         """
@@ -267,8 +312,8 @@ class QuizMaker:
             configDataName (str): Name of config data file.
         """
 
-        numNextToEachOther = {"MA":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
-        allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+        numNextToEachOther = {"MAN":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
+        allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "INT"]
         if self.ql.isGospel:
             numNextToEachOther["SIT"] = 0
             allQuestionTypes.append("SIT")
@@ -318,8 +363,8 @@ class QuizMaker:
             validQuestions (dict): All valid questions within the range.
         """
 
-        validQuestions = {"INT":[],"MA":[], "CR":[], "CVR":[], "Q":[], "FTV":[]}
-        types = ["INT", "MA", "CR", "CVR", "Q", "FTV"]
+        validQuestions = {"INT":[],"MAN":[], "CR":[], "CVR":[], "Q":[], "FTV":[]}
+        types = ["INT", "MAN", "CR", "CVR", "Q", "FTV"]
         if self.ql.isGospel:
             types.append("SIT")
             validQuestions["SIT"] = []
@@ -333,14 +378,18 @@ class QuizMaker:
                 if question.questionType.find(qType) != -1:
                     validQuestions[qType].append(question)
 
+        for qType in types:
+            random.shuffle(validQuestions[qType])
+            random.shuffle(validQuestions[qType])
+
         return validQuestions
 
 
 if __name__ == "__main__":
     # CDL=> clean up main funcs
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
-    refRange = ["2 Corinthians,10,1-2 Corinthians,13,14"]               # Range used as an input
-    qM.generateQuizzes(1, refRange, "default", 0)                       # Generate quizzes
+    refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
+    qM.generateQuizzes(10, refRange, "default", 0)                       # Generate quizzes
     print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 
