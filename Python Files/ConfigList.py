@@ -104,7 +104,7 @@ class ConfigList:
             line1 = (file.readline()).rstrip()
             line1 = line1.split(",")
             typeMinsAndMaxs = {}
-            questionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "SIT"]
+            questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
             i = 0
             for line in file:
                 line = line.rstrip()

@@ -64,7 +64,6 @@ class QuizMaker:
             configDataName (str): Name of config data file.
             isExtraQuestions (bool): Whether extra questions are wanted.
         """
-        # CDL=> Fix error with MA vs CRMA???
 
         # Error Checking
         if numQuizzes <= 0:
@@ -83,7 +82,7 @@ class QuizMaker:
         quizzes = [] # Array to store quizzes
 
         # Dict to track the used questions
-        usedQuestions = {"MAN":[], "CR":[], "CVR":[], "Q":[], "FTV":[], "INT":[]}
+        usedQuestions = {"MA":[], "CR":[], "CVR":[], "Q":[], "FTV":[], "INT":[]}
         # Find all questions within the range and add them to allValidQuestions dict
         allValidQuestions = self.findValidQuestions(arrayOfRanges)
 
@@ -92,9 +91,9 @@ class QuizMaker:
             quiz = Quiz() # Create a quiz object
 
             # Dict to track the number of question types used
-            questionTypesUsed = {"MAN": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
+            questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
             # Array to hold question types
-            allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV"]
+            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
             # Check to see if year is a gospel
             if self.ql.isGospel:
                 allQuestionTypes.append("SIT")
@@ -178,7 +177,7 @@ class QuizMaker:
                 question.questionNumber = str(questionNum)
                 questionNum += 1
             # Array to hold question types
-            allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "INT"]
+            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
             # Check to see if year is a gospel
             if self.ql.isGospel:
                 allQuestionTypes.append("SIT")
@@ -278,12 +277,7 @@ class QuizMaker:
 
             for question in quiz.questions:
                 worksheet.write("A" + str(i), question.questionNumber, allCellFormat)
-                # CDL=> Remove fix later
-                if question.questionType == "MAN":
-                    typeOfQuestion = "MA"
-                else:
-                    typeOfQuestion = question.questionType
-                worksheet.write("B" + str(i), typeOfQuestion, allCellFormat)
+                worksheet.write("B" + str(i), question.questionType, allCellFormat)
                 worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold), allCellFormat)
                 worksheet.write_rich_string("D" + str(i), *self.boldUniqueWords(question.questionAnswer, bold), allCellFormat)
                 worksheet.write("E" + str(i), question.questionBook, allCellFormat)
@@ -313,7 +307,7 @@ class QuizMaker:
         for character in myString:
             if character.isalnum() or character in self.uL.partOfWord:
                 word += character
-            elif word and self.uL.isWordUnique(word):
+            elif self.uL.isWordUnique(word):
                     result.append(boldFormat)
                     result.append(word)
                     result.append(character)
@@ -323,6 +317,13 @@ class QuizMaker:
                     result.append(word)
                 result.append(character)
                 word = ""
+        if word:
+            if self.uL.isWordUnique(word):
+                result.append(boldFormat)
+                result.append(word)
+            else:
+                result.append(word)
+
         return result
 
     def debugQuizGen(self, quizzes, configDataName):
@@ -335,8 +336,8 @@ class QuizMaker:
         """
 
         # Remove function later
-        numNextToEachOther = {"MAN":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
-        allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "INT"]
+        numNextToEachOther = {"MA":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
+        allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
         if self.ql.isGospel:
             numNextToEachOther["SIT"] = 0
             allQuestionTypes.append("SIT")
@@ -386,23 +387,35 @@ class QuizMaker:
             validQuestions (dict): All valid questions within the range.
         """
 
-        validQuestions = {"INT":[],"MAN":[], "CR":[], "CVR":[], "Q":[], "FTV":[]}
-        types = ["INT", "MAN", "CR", "CVR", "Q", "FTV"]
+        validQuestions = {"INT":[], "CR":[], "CVR":[], "MA":[], "Q":[], "FTV":[]}
+        searchTypes = \
+            {"INT":["INT", "INTF"],
+             "CR":["CR", "CRMA"],
+             "CVR":["CVR", "CVRMA"],
+             "MA":["MA"],
+             "Q":["Q", "Q2"],
+             "FTV":["FTV", "FT2V", "FT", "FTN"]}
+
         if self.ql.isGospel:
-            types.append("SIT")
             validQuestions["SIT"] = []
+            searchTypes["SIT"] = ["SIT"]
 
         for question in self.ql.questionDatabase:
             searchVerse = ",".join([question.questionBook, question.questionChapter, question.questionVerseStart])
             if not self.ml.isVerseInRange(searchVerse, arrayOfRanges):
                 continue
 
-            for qType in types:
-                if question.questionType.find(qType) != -1:
-                    validQuestions[qType].append(question)
+            qTypePicked = False
+            for qMainType in searchTypes.keys():
+                if qTypePicked:
+                    break
+                for qType in searchTypes[qMainType]:
+                    if question.questionType.find(qType) != -1: # CDL=>Is find case sensitive?
+                        validQuestions[qMainType].append(question)
+                        qTypePicked = True
+                        break
 
-        for qType in types:
-            random.shuffle(validQuestions[qType])
+        for qType in validQuestions.keys():
             random.shuffle(validQuestions[qType])
 
         return validQuestions

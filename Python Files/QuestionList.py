@@ -48,21 +48,6 @@ class Question:
         self.questionQuestion = qQuestion
         self.questionAnswer = qAnswer
 
-    def printQuestion(self):
-        qStr = "    "
-        qStr += str(self.questionNumber) + ","
-        # qStr += str(self.questionCode) + ","
-        qStr += str(self.questionBook) + ","
-        qStr += str(self.questionChapter) + ","
-        qStr += str(self.questionVerseStart) + ","
-        # qStr += str(self.questionVerseEnd) + ","
-        qStr += str(self.questionType) + ","
-        qStr += str(self.questionQuestion) + ","
-        qStr += str(self.questionAnswer)
-        qStr = qStr.rstrip("\r\n")
-        print(qStr)
-
-
 class QuestionList:
     """
     A class to store the questions and perform functions on them.

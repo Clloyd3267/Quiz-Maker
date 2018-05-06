@@ -454,47 +454,47 @@ ark$2 Corinthians$13$3$$INT$Demanding » proof that what? $Christ is speaking th
 arl$2 Corinthians$13$3$$INT$Powerful » where?$Among you.
 arm$2 Corinthians$13$11$$INT$Strive » for what? $Full restoration.
 arn$2 Corinthians$13$11$$INT$Encourage » whom?$One another.
-aro$1 Corinthians$1$10$$MAN$Be perfectly » united in what?$Mind and thought.
-arp$1 Corinthians$4$3$$MAN$I care » very little if I am judged by whom?$You or by any human court.
-arq$1 Corinthians$4$21$$MAN$Shall I come » to you how?$With a rod of discipline, in love and with a gentle spirit.
-arr$1 Corinthians$5$8$$MAN$The unleavened » bread of what?$Sincerity and truth.
-ars$1 Corinthians$5$4$$MAN$Hand this » man over to Satan for the destruction of the flesh, when?$When you are assembled and I am with you in spirit, and the power of our Lord Jesus is present.
-art$1 Corinthians$6$7$$MAN$Why not » rather be what?$Wronged; cheated.
-aru$1 Corinthians$6$11$$MAN$Justified » how?$In the name of the Lord Jesus Christ and by the Spirit of our God.
-arv$1 Corinthians$6$14$$MAN$By his power » God what? $Raised the Lord from the dead, and he will raise us also.
-arw$1 Corinthians$7$34$$MAN$Her aim » is to be devoted to the Lord in both what?$Body and spirit.
-arx$1 Corinthians$11$26$$MAN$You proclaim » the Lord’s death until he comes when?$Whenever you eat this bread and drink this cup.
-ary$1 Corinthians$11$28$$MAN$Everyone ought » to examine themselves before they what?$Eat of the bread and drink from the cup.
-arz$1 Corinthians$12$17$$MAN$The sense » of what?$Hearing; smell.
-asa$1 Corinthians$13$1$$MAN$The tongues » of whom?$Men or of angels.
-asb$1 Corinthians$13$2$$MAN$Fathom » what?$All mysteries and all knowledge.
-asc$1 Corinthians$13$4$$MAN$Love is » what?$Patient; kind.
-asd$1 Corinthians$13$7$$MAN$It always » what?$Protects, trusts, hopes, perseveres.
-ase$1 Corinthians$14$7$$MAN$Lifeless » things that make sounds, such as what?$The pipe or harp.
-asf$1 Corinthians$14$15$$MAN$Sing » with what? $My spirit; my understanding.
-asg$1 Corinthians$14$22$$MAN$Tongues, then, » are a sign, how?$Not for believers but for unbelievers.
-ash$1 Corinthians$15$3$$MAN$I passed on » to you as of first importance: what?$That Christ died for our sins according to the Scriptures, that he was buried, that he was raised on the third day according to the Scriptures, and that he appeared to Cephas, and then to the Twelve.
-asi$1 Corinthians$15$50$$MAN$I declare » to you, brothers and sisters, that what? $Flesh and blood cannot inherit the kingdom of God, nor does the perishable inherit the imperishable.
-asj$1 Corinthians$15$55$$MAN$Where, O » death, is what?$Your victory; your sting.
-ask$1 Corinthians$16$16$$MAN$Submit » to whom?$Such people and to everyone who joins in the work and labors at it.
-asl$1 Corinthians$16$17$$MAN$Who arrived? »$Stephanas, Fortunatus and Achaicus.
-asm$2 Corinthians$1$6$$MAN$What is for your comfort? » $If we are distressed; if we are comforted.
-asn$2 Corinthians$6$7$$MAN$With weapons » of righteousness where?$In the right hand and in the left.
-aso$2 Corinthians$7$1$$MAN$Purify » ourselves from everything that contaminates what?$Body and spirit.
-asp$2 Corinthians$7$11$$MAN$This godly » sorrow has produced in you:  what?$What earnestness, what eagerness to clear yourselves, what indignation, what alarm, what longing, what concern, what readiness to see justice done.
-asq$2 Corinthians$8$3$$MAN$I testify » that they gave what? $As much as they were able, and even beyond their ability.
-asr$2 Corinthians$8$13$$MAN$Our desire » is what?$Not that others might be relieved while you are hard pressed, but that there might be equality.
-ass$2 Corinthians$8$21$$MAN$Taking » pains to do what is right where?$Not only in the eyes of the Lord but also in the eyes of man.
-ast$2 Corinthians$8$24$$MAN$Show these » men what?$The proof of your love and the reason for our pride in you.
-asu$2 Corinthians$9$5$$MAN$Necessary » to urge the brothers to what?$Visit you in advance and finish the arrangements for the generous gift you had promised.
-asv$2 Corinthians$9$6$$MAN$Sows » how?$Sparingly; generously.
-asw$2 Corinthians$9$12$$MAN$This service that » you perform is what? $Not only supplying the needs of the Lord’s people but is also overflowing in many expressions of thanks to God.
-asx$2 Corinthians$10$5$$MAN$We demolish » what?$Arguments and every pretension that sets itself up against the knowledge of God.
-asy$2 Corinthians$10$10$$MAN$His letters » are what? $Weighty and forceful.
-asz$2 Corinthians$11$4$$MAN$A different » what?$Spirit; gospel.
-ata$2 Corinthians$11$20$$MAN$In fact, » you even put up with anyone who what? $Enslaves you or exploits you or takes advantage of you or puts on airs or slaps you in the face.
-atb$2 Corinthians$12$10$$MAN$I delight » in what? $Weaknesses; insults; hardships; persecutions; difficulties.
-atc$2 Corinthians$12$12$$MAN$The marks » of a true apostle, including what? $Signs, wonders and miracles.
+aro$1 Corinthians$1$10$$MA$Be perfectly » united in what?$Mind and thought.
+arp$1 Corinthians$4$3$$MA$I care » very little if I am judged by whom?$You or by any human court.
+arq$1 Corinthians$4$21$$MA$Shall I come » to you how?$With a rod of discipline, in love and with a gentle spirit.
+arr$1 Corinthians$5$8$$MA$The unleavened » bread of what?$Sincerity and truth.
+ars$1 Corinthians$5$4$$MA$Hand this » man over to Satan for the destruction of the flesh, when?$When you are assembled and I am with you in spirit, and the power of our Lord Jesus is present.
+art$1 Corinthians$6$7$$MA$Why not » rather be what?$Wronged; cheated.
+aru$1 Corinthians$6$11$$MA$Justified » how?$In the name of the Lord Jesus Christ and by the Spirit of our God.
+arv$1 Corinthians$6$14$$MA$By his power » God what? $Raised the Lord from the dead, and he will raise us also.
+arw$1 Corinthians$7$34$$MA$Her aim » is to be devoted to the Lord in both what?$Body and spirit.
+arx$1 Corinthians$11$26$$MA$You proclaim » the Lord’s death until he comes when?$Whenever you eat this bread and drink this cup.
+ary$1 Corinthians$11$28$$MA$Everyone ought » to examine themselves before they what?$Eat of the bread and drink from the cup.
+arz$1 Corinthians$12$17$$MA$The sense » of what?$Hearing; smell.
+asa$1 Corinthians$13$1$$MA$The tongues » of whom?$Men or of angels.
+asb$1 Corinthians$13$2$$MA$Fathom » what?$All mysteries and all knowledge.
+asc$1 Corinthians$13$4$$MA$Love is » what?$Patient; kind.
+asd$1 Corinthians$13$7$$MA$It always » what?$Protects, trusts, hopes, perseveres.
+ase$1 Corinthians$14$7$$MA$Lifeless » things that make sounds, such as what?$The pipe or harp.
+asf$1 Corinthians$14$15$$MA$Sing » with what? $My spirit; my understanding.
+asg$1 Corinthians$14$22$$MA$Tongues, then, » are a sign, how?$Not for believers but for unbelievers.
+ash$1 Corinthians$15$3$$MA$I passed on » to you as of first importance: what?$That Christ died for our sins according to the Scriptures, that he was buried, that he was raised on the third day according to the Scriptures, and that he appeared to Cephas, and then to the Twelve.
+asi$1 Corinthians$15$50$$MA$I declare » to you, brothers and sisters, that what? $Flesh and blood cannot inherit the kingdom of God, nor does the perishable inherit the imperishable.
+asj$1 Corinthians$15$55$$MA$Where, O » death, is what?$Your victory; your sting.
+ask$1 Corinthians$16$16$$MA$Submit » to whom?$Such people and to everyone who joins in the work and labors at it.
+asl$1 Corinthians$16$17$$MA$Who arrived? »$Stephanas, Fortunatus and Achaicus.
+asm$2 Corinthians$1$6$$MA$What is for your comfort? » $If we are distressed; if we are comforted.
+asn$2 Corinthians$6$7$$MA$With weapons » of righteousness where?$In the right hand and in the left.
+aso$2 Corinthians$7$1$$MA$Purify » ourselves from everything that contaminates what?$Body and spirit.
+asp$2 Corinthians$7$11$$MA$This godly » sorrow has produced in you:  what?$What earnestness, what eagerness to clear yourselves, what indignation, what alarm, what longing, what concern, what readiness to see justice done.
+asq$2 Corinthians$8$3$$MA$I testify » that they gave what? $As much as they were able, and even beyond their ability.
+asr$2 Corinthians$8$13$$MA$Our desire » is what?$Not that others might be relieved while you are hard pressed, but that there might be equality.
+ass$2 Corinthians$8$21$$MA$Taking » pains to do what is right where?$Not only in the eyes of the Lord but also in the eyes of man.
+ast$2 Corinthians$8$24$$MA$Show these » men what?$The proof of your love and the reason for our pride in you.
+asu$2 Corinthians$9$5$$MA$Necessary » to urge the brothers to what?$Visit you in advance and finish the arrangements for the generous gift you had promised.
+asv$2 Corinthians$9$6$$MA$Sows » how?$Sparingly; generously.
+asw$2 Corinthians$9$12$$MA$This service that » you perform is what? $Not only supplying the needs of the Lord’s people but is also overflowing in many expressions of thanks to God.
+asx$2 Corinthians$10$5$$MA$We demolish » what?$Arguments and every pretension that sets itself up against the knowledge of God.
+asy$2 Corinthians$10$10$$MA$His letters » are what? $Weighty and forceful.
+asz$2 Corinthians$11$4$$MA$A different » what?$Spirit; gospel.
+ata$2 Corinthians$11$20$$MA$In fact, » you even put up with anyone who what? $Enslaves you or exploits you or takes advantage of you or puts on airs or slaps you in the face.
+atb$2 Corinthians$12$10$$MA$I delight » in what? $Weaknesses; insults; hardships; persecutions; difficulties.
+atc$2 Corinthians$12$12$$MA$The marks » of a true apostle, including what? $Signs, wonders and miracles.
 atd$1 Corinthians$1$7$$Q$Quote 1 Corinthians chapter 1 verse 7.$Therefore you do not lack any spiritual gift as you eagerly wait for our Lord Jesus Christ to be revealed.
 ate$1 Corinthians$1$18$$Q$Quote 1 Corinthians chapter 1 verse 18.$For the message of the cross is foolishness to those who are perishing, but to us who are being saved it is the power of God.
 atf$1 Corinthians$1$21$$Q$Quote 1 Corinthians chapter 1 verse 21.$For since in the wisdom of God the world through its wisdom did not know him, God was pleased through the foolishness of what was preached to save those who believe.
