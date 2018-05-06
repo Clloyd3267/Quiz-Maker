@@ -4,6 +4,9 @@
 # Description : Classes to store and manage config files
 ###################################################################################################
 
+# External Imports
+from pathlib import Path # Used for file manipulation
+
 
 class Config:
     """
@@ -78,17 +81,18 @@ class ConfigList:
             configFileName (str): The input file name of program config data.
         """
 
+        dataFilePath = Path("../Data Files/Config Files/") # Path where datafiles are stored
         configFileNames = ["default.csv"]  # The array that stores all of the config filenames
 
         # Ensure that the program config file exists, if not make it
         try:
-            configFile = open(configFileName, 'r')
+            configFile = open(dataFilePath / configFileName, 'r')
         except IOError:
-            configFile = open(configFileName, 'w')
+            configFile = open(dataFilePath / configFileName, 'w')
         configFile.close()
 
         # Read in filenames for config files
-        configFile = open(configFileName, "r")
+        configFile = open(dataFilePath / configFileName, "r")
         for line in configFile:
             line.rstrip()
             configFileNames.append(line)
@@ -96,7 +100,7 @@ class ConfigList:
 
         # Read in Config data from each file
         for fileName in configFileNames:
-            file = open(fileName, "r")
+            file = open(dataFilePath / fileName, "r")
             line1 = (file.readline()).rstrip()
             line1 = line1.split(",")
             typeMinsAndMaxs = {}

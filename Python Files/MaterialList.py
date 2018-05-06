@@ -4,6 +4,9 @@
 # Description : Classes to store and manage material references
 ###################################################################################################
 
+# External Imports
+from pathlib import Path # Used for file manipulation
+
 class MaterialList:
     """
     A class to store the material and perform operations on it.
@@ -32,7 +35,8 @@ class MaterialList:
            materialFileName (str): The input filename for material.
         """
 
-        materialFile = open(materialFileName, "r")
+        dataFilePath = Path("../Data Files/") # Path where datafiles are stored
+        materialFile = open(dataFilePath / materialFileName, "r")
 
         # For each verse in object append to materialRange
         for chapter in materialFile:

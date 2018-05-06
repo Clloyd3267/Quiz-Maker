@@ -6,8 +6,10 @@
 
 # External Imports
 import xlsxwriter # Used to write quizzes to excel files
+import re # Used for pattern matching
 import time # Used to time exception speed
 import random # Used for random numbers and random choice
+from pathlib import Path # Used for file manipulation
 
 # Project Imports
 from QuestionList import *
@@ -31,14 +33,6 @@ class Quiz:
         """
         self.questions = [] # An array to store the questions
 
-    def printQuiz(self):
-        """
-        Function to print the quizzes.
-        """
-
-        for question in self.questions:
-            question.printQuestion()
-
 
 class QuizMaker:
     """
@@ -57,7 +51,7 @@ class QuizMaker:
 
         self.ql = QuestionList()  # Create an object of type QuestionList
         self.ml = MaterialList()  # Create an object of type MaterialList
-        self.ul = UniqueList()
+        self.uL = UniqueList()
         self.cl = ConfigList()    # Create an object of type ConfigList
 
     def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, isExtraQuestions):
@@ -252,55 +246,83 @@ class QuizMaker:
             quizNum += 1 # Increment quiz number
 
         self.debugQuizGen(quizzes, configDataName) # Function to debug quizzes
+        self.exportQuizzes(quizzes) # Function to export quizzes to excel
 
-        workbook = xlsxwriter.Workbook('Quizzes.xlsx')
+    def exportQuizzes(self, quizzes):
+        """
+        Function to export quizzes to excel file.
+
+        Parameters:
+           quizzes (array of quiz objects): All of the quizzes to be outputted.
+        """
+
+        fileName = Path("../Quizzes.xlsx")
+        workbook = xlsxwriter.Workbook(fileName)
         worksheet = workbook.add_worksheet()
-        cell_format1 = workbook.add_format({'font_size': 10, 'text_wrap': 1, 'valign': 'top', 'border': 1})
+        allCellFormat = workbook.add_format({'font_size': 10, 'text_wrap': 1, 'valign': 'top', 'border': 1})
         bold = workbook.add_format({'bold': 1})
 
-        length_list = [3, 9, 38, 65, 12, 3, 3]
-        for i, width in enumerate(length_list):
+        # Size columns
+        colLengthList = [3, 9, 38, 65, 12, 3, 3] # Lengths of columns in output file
+        for i, width in enumerate(colLengthList):
             worksheet.set_column(i, i, width)
 
         i = 1
         j = 1
         for quiz in quizzes:
+            print("Debug")
             i += 1
             worksheet.write("A" + str(i),"Districts Practice " + str(j))
             i += 1
             j += 1
 
             for question in quiz.questions:
-                worksheet.write("A" + str(i), question.questionNumber, cell_format1)
+                worksheet.write("A" + str(i), question.questionNumber, allCellFormat)
+                # CDL=> Remove fix later
                 if question.questionType == "MAN":
                     typeOfQuestion = "MA"
                 else:
                     typeOfQuestion = question.questionType
-                worksheet.write("B" + str(i), typeOfQuestion, cell_format1)
-                if question.questionType == "MA" or question.questionType == "INT":
-                    worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold, cell_format1))
-                else:
-                    worksheet.write("C" + str(i), question.questionQuestion, cell_format1)
-                worksheet.write_rich_string("D" + str(i), *self.boldUniqueWords(question.questionAnswer, bold, cell_format1))
-                worksheet.write("E" + str(i), question.questionBook, cell_format1)
-                worksheet.write("F" + str(i), question.questionChapter, cell_format1)
-                worksheet.write("G" + str(i), question.questionVerseStart, cell_format1)
+                worksheet.write("B" + str(i), typeOfQuestion, allCellFormat)
+                worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold), allCellFormat)
+                worksheet.write_rich_string("D" + str(i), *self.boldUniqueWords(question.questionAnswer, bold), allCellFormat)
+                worksheet.write("E" + str(i), question.questionBook, allCellFormat)
+                worksheet.write("F" + str(i), question.questionChapter, allCellFormat)
+                worksheet.write("G" + str(i), question.questionVerseStart, allCellFormat)
                 i += 1
-
 
         workbook.close()
 
-    def boldUniqueWords(self, myString, boldFormat, mainFormat):
-        myString = ''.join([c for c in myString if c.isalnum() or c.isspace() or (c == "-") or c == "’"])
+    def boldUniqueWords(self, myString, boldFormat):
+        """
+        Function to bold unique words in a particular string.
+
+        Parameters:
+            myString (str): The input string to be bolded.
+            boldFormat (xlsxwriter format object): The format to be applied to unique words.
+        """
+
+        if myString == "":
+            print(myString)
         result = []
-        for word in myString.split():
-            word += " "
-            if self.ul.isWordUnique(word):
-                result.append(boldFormat)
-                result.append(word)
+        word = ""
+        match = re.search(r'According\sto.*Chapter', myString, re.IGNORECASE)
+        if match:
+            result.append(myString)
+            return result
+        for character in myString:
+            if character.isalnum() or character in self.uL.partOfWord:
+                word += character
+            elif word and self.uL.isWordUnique(word):
+                    result.append(boldFormat)
+                    result.append(word)
+                    result.append(character)
+                    word = ""
             else:
-                result.append(word)
-        result.append(mainFormat)
+                if word:
+                    result.append(word)
+                result.append(character)
+                word = ""
         return result
 
     def debugQuizGen(self, quizzes, configDataName):
@@ -312,6 +334,7 @@ class QuizMaker:
             configDataName (str): Name of config data file.
         """
 
+        # Remove function later
         numNextToEachOther = {"MAN":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
         allQuestionTypes = ["MAN", "CR", "CVR", "Q", "FTV", "INT"]
         if self.ql.isGospel:
@@ -386,10 +409,10 @@ class QuizMaker:
 
 
 if __name__ == "__main__":
-    # CDL=> clean up main funcs
+    # CDL=> clean up main func
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
     refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
-    qM.generateQuizzes(10, refRange, "default", 0)                       # Generate quizzes
+    qM.generateQuizzes(50, refRange, "default", 0)                       # Generate quizzes
     print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 

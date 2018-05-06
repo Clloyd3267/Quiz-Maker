@@ -1,8 +1,11 @@
 ###################################################################################################
 # Name        : UniqueList.py
 # Author(s)   : Chris Lloyd, Andrew Southwick
-# Description : Class to store uniques words
+# Description : Class to store and manage uniques words
 ###################################################################################################
+
+# External Imports
+from pathlib import Path # Used for file manipulation
 
 class UniqueList:
     """
@@ -13,8 +16,10 @@ class UniqueList:
     """
 
     uniqueWords = [] # An array to hold all of the unique words
+    partOfWord = [] # An array to hold any characters that are not a number or letter.
 
-    def __init__(self, UniqueWordsFileName = "uniquewords.csv"):
+
+    def __init__(self, UniqueWordsFileName = "UniqueWords.txt"):
         """
         The constructor for class MaterialList.
 
@@ -32,12 +37,19 @@ class UniqueList:
            UniqueWordsFileName (str): The input filename for Unique Words.
         """
 
-        uniqueWordsFile = open(UniqueWordsFileName, "r")
+        dataFilePath = Path("../Data Files/") # Path where datafiles are stored
+        uniqueWordsFile = open(dataFilePath / UniqueWordsFileName, "r", encoding = 'UTF-8')
 
-        # For each verse in object append to materialRange
         for uniqueWord in uniqueWordsFile:
             uniqueWord = uniqueWord.rstrip()
+            if not uniqueWord:
+                continue
             self.uniqueWords.append(uniqueWord)
+
+            for character in uniqueWord:
+                if character not in self.partOfWord and not character.isalnum() and not character.isspace():
+                    self.partOfWord.append(character)
+
         uniqueWordsFile.close()
 
     def isWordUnique(self, testWord):
@@ -60,8 +72,3 @@ class UniqueList:
             if testWord == uniqueWord:
                 return True
         return False
-
-
-# if __name__ == '__main__':
-#     ul1 = UniqueList()  # Create an object of type MaterialList
-#     print(ul1.isWordUnique("Thus "))
