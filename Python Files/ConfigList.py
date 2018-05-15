@@ -101,87 +101,44 @@ class ConfigList:
         # Read in Config data from each file
         for fileName in configFileNames:
             file = open(dataFilePath / fileName, "r")
-            line1 = (file.readline()).rstrip()
-            line1 = line1.split(",")
+            numberOfQuestions = file.readline().rstrip()[18:]
+            isAAndB = file.readline().rstrip()[8:]
+            randAB = file.readline().rstrip()[7:]
+            sameAB = file.readline().rstrip()[7:]
+            intWeight = file.readline().rstrip()[10:]
+            file.readline()
             typeMinsAndMaxs = {}
-            questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
-            i = 0
-            for line in file:
-                line = line.rstrip()
-                typeMinsAndMaxs[questionTypes[i]] = line.split(",")
-                i += 1
-            self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1],
-                                                    line1[2], line1[3], line1[4], typeMinsAndMaxs)
+            while True:
+                line = file.readline().rstrip()
+                if not line:
+                    break
+                qType = line[0:line.find(":")]
+                data = line[line.find(":") + 1:]
+                typeMinsAndMaxs[qType] = data.split(",")
+            self.configList[fileName[:-4]] = Config(fileName[:-4], numberOfQuestions, isAAndB,
+                                                    randAB, sameAB, intWeight, typeMinsAndMaxs)
             file.close()
 
-    def printConfigData(self):
-        """
-        Function to print config data.
-        """
-
-        for config in self.configList:
-            print("=====================================")
-            print("Config Data for: " + self.configList[config].configName)
-            print("Number of Questions: " + self.configList[config].numberOfQuestions)
-            print("Are there A's and B's: " + self.configList[config].isAAndB)
-            if self.configList[config].randAB == "1" and self.configList[config].sameAB == "0":
-                aBType = "Random"
-            elif self.configList[config].sameAB == "1" and self.configList[config].randAB == "0":
-                aBType = "Same as numbered question"
-            print("INT weight: " + str(self.configList[config].intWeight))
-            print("A's and B's question type: " + aBType)
-            print("    Min, Max")
-            print("Ma:  " + self.configList[config].typeMinMax[0][0] + ",   " + self.configList[config].typeMinMax[0][1])
-            print("CR:  " + self.configList[config].typeMinMax[1][0] + ",   " + self.configList[config].typeMinMax[1][1])
-            print("CVR: " + self.configList[config].typeMinMax[2][0] + ",   " + self.configList[config].typeMinMax[2][1])
-            print("Q:   " + self.configList[config].typeMinMax[3][0] + ",   " + self.configList[config].typeMinMax[3][1])
-            print("FTV: " + self.configList[config].typeMinMax[4][0] + ",   " + self.configList[config].typeMinMax[4][1])
-            print("SIT: " + self.configList[config].typeMinMax[5][0] + ",   " + self.configList[config].typeMinMax[5][1])
-            print("=====================================")
-
-    def exportConfigFiles(self, configFileName):
-        """
-        Function to export config data.
-
-        Parameters:
-            configFileName (str): The output file name of program config data.
-        """
-
-        # configFileNames = ["default.csv"]  # The array that stores all of the config filenames
-
-        # Write out filenames for config files
-        # configFile = open(configFileName, "w")
-        # for configName in list(self.configList.keys()):
-        #     fileName = configName + ".csv"
-        #     configFile.write(fileName)
-        #
-        #     configDataFile = open(fileName, "w")
-        #
-        #     line1 = ""
-        #     line1 += self.configList[configName].numberOfQuestions + ","
-        #     line1 += self.configList[configName].isAAndB + ","
-        #     line1 += self.configList[configName].randAB + ","
-        #     line1 += self.configList[configName].cSameAB + ","
-        #     line1 += self.configList[configName].cIntWeight + ","
-        #
-        #
-        #     configFileNames.append(line)
-        # configFile.close()
-
-        # Read in Config data from each file
-        # for fileName in configFileNames:
-        #     file = open(fileName, "r")
-        #     line1 = (file.readline()).rstrip()
-        #     line1 = line1.split(",")
-        #     typeMinsAndMaxs = {}
-        #     questionTypes = ["MA", "CR", "CVR", "Q", "FTV", "SIT"]
-        #     i = 0
-        #     for line in file:
-        #         line = line.rstrip()
-        #         typeMinsAndMaxs[questionTypes[i]] = line.split(",")
-        #         i += 1
-        #     self.configList[fileName[:-4]] = Config(fileName[:-4], line1[0], line1[1],
-        #                                             line1[2], line1[3], line1[4], typeMinsAndMaxs)
-        #     file.close()
+    # def exportConfigFiles(self, configFileName):
+    #     """
+    #     Function to export config data.
+    #
+    #     Parameters:
+    #         configFileName (str): The output file name of program config data.
+    #     """
+    #
+    #     # Write out filenames for config files
+    #     configFile = open(configFileName, "w")
+    #     for configName in list(self.configList.keys()):
+    #         fileName = configName + ".csv"
+    #         if fileName != "default.csv":
+    #             configFile.write(fileName)
+    #
+    #     for configName in list(self.configList.keys()):
+    #         try:
+    #             file = open(fileName, 'r')
+    #         except IOError:
+    #             file = open(fileName, 'w')
+    #
 
      # CDL=> Add addConfig and editConfig and exportConfigFiles functions

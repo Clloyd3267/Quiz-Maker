@@ -19,21 +19,6 @@ from ConfigList import *
 
 start_time = time.time() # Start a timer
 
-class Quiz:
-    """
-    A class to store the attributes of a quiz.
-
-    Attributes:
-        questions (array of question obj): An array to store the questions.
-    """
-
-    def __init__(self):
-        """
-        The constructor for class Quiz.
-        """
-        self.questions = [] # An array to store the questions
-
-
 class QuizMaker:
     """
     A class to perform the high level functions in quiz creation.
@@ -53,6 +38,13 @@ class QuizMaker:
         self.ml = MaterialList()  # Create an object of type MaterialList
         self.uL = UniqueList()
         self.cl = ConfigList()    # Create an object of type ConfigList
+
+        self.configDataName = None
+        self.usedQuestions = None
+        self.allValidQuestions = None
+        self.questionTypesUsed = None
+        self.allQuestionTypes = None
+        self.questionNum = None
 
     def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, isExtraQuestions):
         """
@@ -79,168 +71,34 @@ class QuizMaker:
             print("Error!!! isExtraQuestions must be a bool value.")
             return
 
+        self.configDataName = configDataName
+
         quizzes = [] # Array to store quizzes
 
         # Dict to track the used questions
-        usedQuestions = {"MA":[], "CR":[], "CVR":[], "Q":[], "FTV":[], "INT":[]}
+        self.usedQuestions = {"MA":[], "CR":[], "CVR":[], "Q":[], "FTV":[], "INT":[]}
         # Find all questions within the range and add them to allValidQuestions dict
-        allValidQuestions = self.findValidQuestions(arrayOfRanges)
+        self.allValidQuestions = self.findValidQuestions(arrayOfRanges)
 
         quizNum = 0 # Iterator for number of quizzes
         while quizNum != numQuizzes:
-            quiz = Quiz() # Create a quiz object
+            quiz = [] # Create array to store a quiz
 
             # Dict to track the number of question types used
-            questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
+            self.questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
             # Array to hold question types
-            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
+            self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
             # Check to see if year is a gospel
             if self.ql.isGospel:
-                allQuestionTypes.append("SIT")
-                questionTypesUsed["SIT"] = 0
+                self.allQuestionTypes.append("SIT")
+                self.questionTypesUsed["SIT"] = 0
 
-            numInts = 0 # Iterator for INT weight
-            while numInts != int(self.cl.configList[configDataName].intWeight):
-                allQuestionTypes.append("INT")
-                numInts += 1
-
-            questionNum = 0 # Iterator for number of questions
-            # Loop to fill the minimums of each type
-            while questionNum != int(self.cl.configList[configDataName].numberOfQuestions):
-                if self.minMet(configDataName, questionTypesUsed): # Check to see if all minimums have been filled
-                    break
-
-                questionPicked = False # Var to track if a question has been picked
-                while not questionPicked:
-                    # Pick a random type of question
-                    randomQType = random.choice(list(allValidQuestions.keys()))
-
-                    # Check to see if question type is INT
-                    if randomQType == "INT":
-                        continue
-                    # Check to see if question type has met it's minimum
-                    elif int(questionTypesUsed[randomQType]) == int(self.cl.configList[configDataName].typeMinMax[randomQType][0]):
-                        continue
-                    # Select a question from unused pile
-                    elif allValidQuestions[randomQType]:
-                        selectedQuestion = random.choice(allValidQuestions[randomQType])
-                        allValidQuestions[randomQType].remove(selectedQuestion)
-                        usedQuestions[randomQType].append(selectedQuestion)
-                    # Select a question from used pile
-                    else:
-                        selectedQuestion = random.choice(usedQuestions[randomQType])
-
-                    # Add question and iterate variables
-                    quiz.questions.append(selectedQuestion)
-                    questionTypesUsed[randomQType] += 1
-                    questionPicked = True
-                    questionNum += 1
-
-            questionTypesUsed["INT"] = 0 # Add INTs to dict for storing question type count
-
-            # Loop for the rest of the numbered questions
-            while questionNum != int(self.cl.configList[configDataName].numberOfQuestions):
-                questionPicked = False # Var to track if a question has been picked
-                while not questionPicked:
-                    # Pick a random type of question
-                    randomQType = random.choice(allQuestionTypes)
-
-                    # Check to see if question type has met it's maximum
-                    if randomQType != "INT" and int(questionTypesUsed[randomQType]) == int(
-                        self.cl.configList[configDataName].typeMinMax[randomQType][1]):
-                        allQuestionTypes.remove(randomQType)
-                        continue
-                    # Select a question from unused pile
-                    elif allValidQuestions[randomQType]:
-                        selectedQuestion = random.choice(allValidQuestions[randomQType])
-                        allValidQuestions[randomQType].remove(selectedQuestion)
-                        usedQuestions[randomQType].append(selectedQuestion)
-                    # Select a question from used pile
-                    else:
-                        selectedQuestion = random.choice(usedQuestions[randomQType])
-
-                    # Add question and iterate variables
-                    quiz.questions.append(selectedQuestion)
-                    questionPicked = True
-                    questionTypesUsed[randomQType] += 1
-                    questionNum += 1
-
-            random.shuffle(quiz.questions)  # Shuffle the numbered questions
-            random.shuffle(quiz.questions)  # Shuffle the numbered questions
-            random.shuffle(quiz.questions)  # Shuffle the numbered questions
-            random.shuffle(quiz.questions)  # Shuffle the numbered questions
-            random.shuffle(quiz.questions)  # Shuffle the numbered questions
-
-            # Add question numbers to the non A and B questions
-            questionNum = 1
-            for question in quiz.questions:
-                question.questionNumber = str(questionNum)
-                questionNum += 1
-            # Array to hold question types
-            allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
-            # Check to see if year is a gospel
-            if self.ql.isGospel:
-                allQuestionTypes.append("SIT")
-
-            questionNum = 1 # Iterator for question number
-            questionIndex = 0 # Iterator for question index
-            # Loop to fill A and B questions if any
-            while questionNum != int(self.cl.configList[configDataName].numberOfQuestions) + 1:
-                # If an A and B questions are needed
-                if questionNum >= 16  and self.cl.configList[configDataName].isAAndB:
-
-                    # If A and B questions should be filled using the same as the numbered question
-                    if self.cl.configList[configDataName].sameAB == "1":
-                        for qType in allQuestionTypes:
-                            if quiz.questions[questionIndex].questionType.find(qType) != -1:
-                                for subLetter in ["A", "B"]:
-                                    # Select a question from unused pile
-                                    if allValidQuestions[qType]:
-                                        selectedQuestion = random.choice(allValidQuestions[qType])
-                                        allValidQuestions[qType].remove(selectedQuestion)
-                                        usedQuestions[qType].append(selectedQuestion)
-                                    # Select a question from used pile
-                                    else:
-                                        selectedQuestion = random.choice(usedQuestions[qType])
-
-                                    selectedQuestion.questionNumber = str(questionNum) + subLetter
-                                    if subLetter == "A":
-                                        quiz.questions.insert(questionIndex + 1, selectedQuestion)
-                                    elif subLetter == "B":
-                                        quiz.questions.insert(questionIndex + 2, selectedQuestion)
-
-                    # If A and B questions should be filled using a random question type
-                    if self.cl.configList[configDataName].randAB == "1":
-                        for subLetter in ["A", "B"]:
-                            questionPicked = False  # Var to track if a question has been picked
-                            while not questionPicked:
-                                # Pick a random type of question
-                                randomQType = random.choice(allQuestionTypes)
-                                # Check to see if question type has met it's maximum
-                                if randomQType != "INT" and int(questionTypesUsed[randomQType]) == int(
-                                    self.cl.configList[configDataName].typeMinMax[randomQType][1]):
-                                    allQuestionTypes.remove(randomQType)
-                                    continue
-                                # Select a question from unused pile
-                                elif allValidQuestions[randomQType]:
-                                    selectedQuestion = random.choice(allValidQuestions[randomQType])
-                                    allValidQuestions[randomQType].remove(selectedQuestion)
-                                    usedQuestions[randomQType].append(selectedQuestion)
-                                # Select a question from used pile
-                                else:
-                                    selectedQuestion = random.choice(usedQuestions[randomQType])
-
-                                selectedQuestion.questionNumber = str(questionNum) + subLetter
-                                if subLetter == "A":
-                                    quiz.questions.insert(questionIndex + 1, selectedQuestion)
-                                elif subLetter == "B":
-                                    quiz.questions.insert(questionIndex + 2, selectedQuestion)
-                                questionPicked = True
-                                questionTypesUsed[randomQType] += 1
-                    questionIndex += 3 # Increment question index
-                else:
-                    questionIndex += 1 # Increment question index
-                questionNum += 1 # Increment question number
+            self.questionNum = 0 # Iterator for number of questions
+            self.fillMinimums(quiz)
+            self.fillRemainingNumberedQuestions(quiz)
+            random.shuffle(quiz)  # Shuffle the numbered questions
+            self.addQuestionNumbers(quiz)
+            self.addAAndBQuestions(quiz)
             quizzes.append(quiz) # Add the quiz to the list of quizzes
             quizNum += 1 # Increment quiz number
 
@@ -258,24 +116,23 @@ class QuizMaker:
         fileName = Path("../Quizzes.xlsx")
         workbook = xlsxwriter.Workbook(fileName)
         worksheet = workbook.add_worksheet()
-        allCellFormat = workbook.add_format({'font_size': 10, 'text_wrap': 1, 'valign': 'top', 'border': 1})
+        allCellFormat = workbook.add_format({'font_size': 11, 'text_wrap': 1, 'valign': 'top', 'border': 1})
         bold = workbook.add_format({'bold': 1})
 
         # Size columns
-        colLengthList = [3, 9, 38, 65, 12, 3, 3] # Lengths of columns in output file
+        colLengthList = [5, 9, 38, 65, 12, 3, 3] # Lengths of columns in output file
         for i, width in enumerate(colLengthList):
             worksheet.set_column(i, i, width)
 
         i = 1
         j = 1
         for quiz in quizzes:
-            print("Debug")
             i += 1
-            worksheet.write("A" + str(i),"Districts Practice " + str(j))
+            worksheet.write("A" + str(i),"Quiz " + str(j))
             i += 1
             j += 1
 
-            for question in quiz.questions:
+            for question in quiz:
                 worksheet.write("A" + str(i), question.questionNumber, allCellFormat)
                 worksheet.write("B" + str(i), question.questionType, allCellFormat)
                 worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold), allCellFormat)
@@ -337,18 +194,18 @@ class QuizMaker:
 
         # Remove function later
         numNextToEachOther = {"MA":0, "CR":0, "CVR":0, "Q":0, "FTV":0, "INT":0}
-        allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+        self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
         if self.ql.isGospel:
             numNextToEachOther["SIT"] = 0
-            allQuestionTypes.append("SIT")
+            self.allQuestionTypes.append("SIT")
 
         for quiz in quizzes:
-            questionNum = 0
-            while questionNum != int(self.cl.configList[configDataName].numberOfQuestions) - 1:
-                for qType in allQuestionTypes:
-                    if quiz.questions[questionNum].questionType.find(qType) != -1 and quiz.questions[questionNum + 1].questionType.find(qType) != -1:
+            self.questionNum = 0
+            while self.questionNum != int(self.cl.configList[self.configDataName].numberOfQuestions) - 1:
+                for qType in self.allQuestionTypes:
+                    if quiz[self.questionNum].questionType.find(qType) != -1 and quiz[self.questionNum + 1].questionType.find(qType) != -1:
                         numNextToEachOther[qType] += 1
-                questionNum += 1
+                self.questionNum += 1
         total = 0
         for key in list(numNextToEachOther.keys()):
             if key != "INT":
@@ -356,12 +213,11 @@ class QuizMaker:
             print(key + ": " + str(numNextToEachOther[key]))
         print("Total:",total)
 
-    def minMet(self, configDataName, questionTypesUsed):
+    def minMet(self, questionTypesUsed):
         """
         Function to check if min is met for all questions.
 
         Parameters:
-            configDataName (str): Name of config data file.
             questionTypesUsed (dict): Number of times each type of question was used.
 
         Returns:
@@ -372,7 +228,7 @@ class QuizMaker:
         for key in list(questionTypesUsed.keys()):
             if key == "INT":
                 continue
-            if int(questionTypesUsed[key]) != int(self.cl.configList[configDataName].typeMinMax[key][0]):
+            if int(questionTypesUsed[key]) != int(self.cl.configList[self.configDataName].typeMinMax[key][0]):
                 return False
         return True
 
@@ -388,44 +244,191 @@ class QuizMaker:
         """
 
         validQuestions = {"INT":[], "CR":[], "CVR":[], "MA":[], "Q":[], "FTV":[]}
-        searchTypes = \
-            {"INT":["INT", "INTF"],
-             "CR":["CR", "CRMA"],
-             "CVR":["CVR", "CVRMA"],
-             "MA":["MA"],
-             "Q":["Q", "Q2"],
-             "FTV":["FTV", "FT2V", "FT", "FTN"]}
 
         if self.ql.isGospel:
             validQuestions["SIT"] = []
-            searchTypes["SIT"] = ["SIT"]
 
         for question in self.ql.questionDatabase:
             searchVerse = ",".join([question.questionBook, question.questionChapter, question.questionVerseStart])
             if not self.ml.isVerseInRange(searchVerse, arrayOfRanges):
                 continue
 
-            qTypePicked = False
-            for qMainType in searchTypes.keys():
-                if qTypePicked:
-                    break
-                for qType in searchTypes[qMainType]:
-                    if question.questionType.find(qType) != -1: # CDL=>Is find case sensitive?
-                        validQuestions[qMainType].append(question)
-                        qTypePicked = True
-                        break
+            qMainType = self.findMainType(question.questionType)
+            if qMainType == None:
+                print(question.questionType)
+            validQuestions[qMainType].append(question)
 
         for qType in validQuestions.keys():
             random.shuffle(validQuestions[qType])
 
         return validQuestions
 
+    def findMainType(self, questionType):
+        searchTypes = \
+            {"INT":["INT", "INTF"],
+             "CR":["CR", "CRMA"],
+             "CVR":["CVR", "CVRMA"],
+             "MA":["MA"],
+             "Q":["Q", "Q2"],
+             "FTV":["FTV", "FT2V", "F2V", "FT", "FTN"]}
+
+        for qMainType in searchTypes.keys():
+            for qType in searchTypes[qMainType]:
+                if questionType.lower().find(qType.lower()) != -1:  # CDL=>Is find case sensitive?
+                    # print("debug: ",questionType)
+                    return qMainType
+
+    def fillMinimums(self, quiz):
+        # func to fill the minimums of each type
+        while self.questionNum != int(self.cl.configList[self.configDataName].numberOfQuestions):
+            if self.minMet(self.questionTypesUsed):  # Check to see if all minimums have been filled
+                break
+
+            questionPicked = False  # Var to track if a question has been picked
+            while not questionPicked:
+                # Pick a random type of question
+                randomQType = random.choice(list(self.allValidQuestions.keys()))
+
+                # Check to see if question type is INT
+                if randomQType == "INT":
+                    continue
+                # Check to see if question type has met it's minimum
+                elif int(self.questionTypesUsed[randomQType]) == int(
+                    self.cl.configList[self.configDataName].typeMinMax[randomQType][0]):
+                    continue
+                # Select a question from unused pile
+                elif self.allValidQuestions[randomQType]:
+                    selectedQuestion = random.choice(self.allValidQuestions[randomQType])
+                    self.allValidQuestions[randomQType].remove(selectedQuestion)
+                    self.usedQuestions[randomQType].append(selectedQuestion)
+                # Select a question from used pile
+                else:
+                    selectedQuestion = random.choice(self.usedQuestions[randomQType])
+
+                # Add question and iterate variables
+                quiz.append(selectedQuestion)
+                self.questionTypesUsed[randomQType] += 1
+                questionPicked = True
+                self.questionNum += 1
+
+        self.questionTypesUsed["INT"] = 0  # Add INTs to dict for storing question type count
+        numInts = 0  # Iterator for INT weight
+        while numInts != int(self.cl.configList[self.configDataName].intWeight):
+            self.allQuestionTypes.append("INT")
+            numInts += 1
+
+    def fillRemainingNumberedQuestions(self, quiz):
+        # Loop for the rest of the numbered questions
+        while self.questionNum != int(self.cl.configList[self.configDataName].numberOfQuestions):
+            questionPicked = False  # Var to track if a question has been picked
+            while not questionPicked:
+                # Pick a random type of question
+                randomQType = random.choice(self.allQuestionTypes)
+
+                # Check to see if question type has met it's maximum
+                if randomQType != "INT" and int(self.questionTypesUsed[randomQType]) == int(
+                    self.cl.configList[self.configDataName].typeMinMax[randomQType][1]):
+                    self.allQuestionTypes.remove(randomQType)
+                    continue
+                # Select a question from unused pile
+                elif self.allValidQuestions[randomQType]:
+                    selectedQuestion = random.choice(self.allValidQuestions[randomQType])
+                    self.allValidQuestions[randomQType].remove(selectedQuestion)
+                    self.usedQuestions[randomQType].append(selectedQuestion)
+                # Select a question from used pile
+                else:
+                    selectedQuestion = random.choice(self.usedQuestions[randomQType])
+
+                # Add question and iterate variables
+                quiz.append(selectedQuestion)
+                questionPicked = True
+                self.questionTypesUsed[randomQType] += 1
+                self.questionNum += 1
+
+    def addQuestionNumbers(self, quiz):
+        # Add question numbers to the non A and B questions
+        self.questionNum = 1
+        for question in quiz:
+            question.questionNumber = str(self.questionNum)
+            self.questionNum += 1
+
+    def addAAndBQuestions(self, quiz):
+        # Array to hold question types
+        self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+        # Check to see if year is a gospel
+        if self.ql.isGospel:
+            self.allQuestionTypes.append("SIT")
+
+        self.questionNum = 1  # Iterator for question number
+        questionIndex = 0  # Iterator for question index
+
+        # Loop to fill A and B questions if any
+        while self.questionNum != int(self.cl.configList[self.configDataName].numberOfQuestions) + 1:
+
+            # If A and B questions are needed
+            if self.questionNum >= 16 and self.cl.configList[self.configDataName].isAAndB:
+
+                # If A and B questions should be filled using the same as the numbered question
+                if self.cl.configList[self.configDataName].sameAB == "1":
+                    qType = self.findMainType(quiz[questionIndex].questionType)
+                    for subLetter in ["A", "B"]:
+                        # Select a question from unused pile
+                        if self.allValidQuestions[qType]:
+                            selectedQuestion = random.choice(self.allValidQuestions[qType])
+                            self.allValidQuestions[qType].remove(selectedQuestion)
+                            self.usedQuestions[qType].append(selectedQuestion)
+                        # Select a question from used pile
+                        else:
+                            selectedQuestion = random.choice(self.usedQuestions[qType])
+
+                        selectedQuestion.questionNumber = str(self.questionNum) + subLetter
+                        if subLetter == "A":
+                            quiz.insert(questionIndex + 1, selectedQuestion)
+                        elif subLetter == "B":
+                            quiz.insert(questionIndex + 2, selectedQuestion)
+                    questionIndex += 3  # Increment question index
+
+                # If A and B questions should be filled using a random question type
+                elif self.cl.configList[self.configDataName].randAB == "1":
+                    for subLetter in ["A", "B"]:
+                        questionPicked = False  # Var to track if a question has been picked
+                        while not questionPicked:
+                            # Pick a random type of question
+                            randomQType = random.choice(self.allQuestionTypes)
+                            # Check to see if question type has met it's maximum
+                            if randomQType != "INT" and int(self.questionTypesUsed[randomQType]) == int(
+                                self.cl.configList[self.configDataName].typeMinMax[randomQType][1]):
+                                self.allQuestionTypes.remove(randomQType)
+                                continue
+                            # Select a question from unused pile
+                            elif self.allValidQuestions[randomQType]:
+                                selectedQuestion = random.choice(self.allValidQuestions[randomQType])
+                                self.allValidQuestions[randomQType].remove(selectedQuestion)
+                                self.usedQuestions[randomQType].append(selectedQuestion)
+                            # Select a question from used pile
+                            else:
+                                selectedQuestion = random.choice(self.usedQuestions[randomQType])
+
+                            selectedQuestion.questionNumber = str(self.questionNum) + subLetter
+                            if subLetter == "A":
+                                quiz.insert(questionIndex + 1, selectedQuestion)
+                            elif subLetter == "B":
+                                quiz.insert(questionIndex + 2, selectedQuestion)
+                            questionPicked = True
+                            self.questionTypesUsed[randomQType] += 1
+                    questionIndex += 3  # Increment question index
+
+            else:
+                questionIndex += 1  # Increment question index
+
+            self.questionNum += 1  # Increment question number
+
 
 if __name__ == "__main__":
     # CDL=> clean up main func
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
     refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
-    qM.generateQuizzes(50, refRange, "default", 0)                       # Generate quizzes
+    qM.generateQuizzes(5, refRange, "default", 0)                       # Generate quizzes
     print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 
