@@ -87,11 +87,16 @@ class QuestionList:
             questionFileName (str): The input filename for questions.
         """
 
-        dataFilePath = Path("../Data Files/") # Path where datafiles are stored
+        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        if questionFileName == "questions.xlsx":
+            questionFilePath = dataFilePath / questionFileName
+        else:
+            questionFilePath = questionFileName
+
         try:
-            book = openpyxl.load_workbook(dataFilePath / questionFileName)
+            book = openpyxl.load_workbook(questionFilePath)
         except IOError:
-            print("Error => File does not exist!!!")
+            print("Error => Question file does not exist!!!")
             return
 
         sheet = book.active  # Open the active sheet
@@ -181,10 +186,15 @@ class QuestionList:
         """
 
         dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        if questionFileName == "questions.xlsx":
+            questionFilePath = dataFilePath / questionFileName
+        else:
+            questionFilePath = questionFileName
+
         try:
-            book = openpyxl.load_workbook(dataFilePath / questionFileName)
+            book = openpyxl.load_workbook(questionFilePath)
         except IOError:
-            print("Error => File does not exist!!!")
+            print("Error => Question file does not exist!!!")
             return
         sheet1 = book.active  # Open the active sheet questionFileName
         book.remove(sheet1)

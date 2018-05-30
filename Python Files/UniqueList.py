@@ -1,11 +1,12 @@
 ###################################################################################################
 # Name        : UniqueList.py
 # Author(s)   : Chris Lloyd, Andrew Southwick
-# Description : Class to store and manage uniques words
+# Description : Class to store and manage unique words
 ###################################################################################################
 
 # External Imports
 from pathlib import Path # Used for file manipulation
+import openpyxl # For reading in unique words
 
 class UniqueList:
     """
@@ -13,55 +14,65 @@ class UniqueList:
 
     Attributes:
         uniqueWords (array of str): An array to hold all of the unique words.
+        partOfWord (array of str): An array to hold any characters that are not a number or letter.
     """
 
     uniqueWords = [] # An array to hold all of the unique words
     partOfWord = [] # An array to hold any characters that are not a number or letter.
 
 
-    def __init__(self, UniqueWordsFileName = "UniqueWords.txt"):
+    def __init__(self, uniqueWordsFileName = "uniqueWords.xlsx"):
         """
-        The constructor for class MaterialList.
+        The constructor for class UniqueList.
 
         Parameters:
-            UniqueWordsFileName (str): The input filename for Unique Words, defaults to "unique.csv".
+            uniqueWordsFileName (str): The input filename for Unique Words, defaults to "uniqueWords.xlsx".
         """
 
-        self.importUniqueWords(UniqueWordsFileName)
+        self.importUniqueWords(uniqueWordsFileName)
 
-    def importUniqueWords(self, UniqueWordsFileName):
+    def importUniqueWords(self, uniqueWordsFileName):
         """
         Function to import and store Unique Words.
 
         Parameters:
-           UniqueWordsFileName (str): The input filename for Unique Words.
+           uniqueWordsFileName (str): The input filename for Unique Words.
         """
 
-        dataFilePath = Path("../Data Files/") # Path where datafiles are stored
-        uniqueWordsFile = open(dataFilePath / UniqueWordsFileName, "r", encoding = 'UTF-8')
+        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        if uniqueWordsFileName == "uniqueWords.xlsx":
+            uniqueWordsFilePath = dataFilePath / uniqueWordsFileName
+        else:
+            uniqueWordsFilePath = uniqueWordsFileName
 
-        for uniqueWord in uniqueWordsFile:
-            uniqueWord = uniqueWord.rstrip()
-            if not uniqueWord:
-                continue
+        try:
+            book = openpyxl.load_workbook(uniqueWordsFilePath) # Open the workbook holding the unique words
+        except IOError:
+            print("Error => Unique words file does not exist!!!")
+            return
+
+        sheet = book.active  # Open the active sheet
+
+        # Loop through all of the unique words
+        for row in sheet.iter_rows(min_row = 1, min_col = 1, max_col = 1):
+            uniqueWord = str(row[0].value).replace(" ", "")
             self.uniqueWords.append(uniqueWord)
 
+            # Find all none alpha and numeric chars
             for character in uniqueWord:
                 if character not in self.partOfWord and not character.isalnum() and not character.isspace():
                     self.partOfWord.append(character)
 
-        uniqueWordsFile.close()
-
     def isWordUnique(self, testWord):
         """
-        Function to import and store Unique Words.
+        Function to check if word is unique.
 
         Parameters:
            testWord (str): The input word to be tested.
 
         Returns:
             True (bool): Word is unique.
-            false (bool): Word is not unique.
+            False (bool): Word is not unique.
         """
 
         testWord = testWord.replace(" ", "")
