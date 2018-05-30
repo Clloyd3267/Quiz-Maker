@@ -82,23 +82,21 @@ class QuizMaker:
 
         quizNum = 0 # Iterator for number of quizzes
         while quizNum != numQuizzes:
-            quiz = []  # Create array to store a quiz
 
-            # Dict to track the number of question types used
-            self.questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
-            # Array to hold question types
-            self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
-            # Check to see if year is a gospel
-            if self.ql.isGospel:
-                self.allQuestionTypes.append("SIT")
-                self.questionTypesUsed["SIT"] = 0
+            # Generate 50 quizzes
+            quizSelection = []
+            quizRatings = []
+            i = 0
+            while i != 25:
+                quiz = self.generateQuiz()
+                rating = self.rateQuiz(quiz)
+                quizSelection.append(quiz)
+                quizRatings.append(rating)
+                i += 1
 
-            self.questionNum = 0  # Iterator for number of questions
-            self.fillMinimums(quiz)
-            self.fillRemainingNumberedQuestions(quiz)
-            random.shuffle(quiz)  # Shuffle the numbered questions
-            self.addQuestionNumbers(quiz)
-            self.addAAndBQuestions(quiz)
+            minIndex = quizRatings.index(min(quizRatings))
+            quiz = quizSelection[minIndex]
+
             quizzes.append(quiz) # Add the quiz to the list of quizzes
             quizNum += 1 # Increment quiz number
 
@@ -214,6 +212,17 @@ class QuizMaker:
             print(key + ": " + str(numNextToEachOther[key]))
         print("Total:",total)
 
+    def rateQuiz(self, quiz):
+        score = 0
+        previousType = ""
+
+        for question in quiz:
+            currentType = self.findMainType(question.questionType)
+            if currentType == previousType:
+                score += 1
+            previousType = currentType
+        return score
+
     def minMet(self, questionTypesUsed):
         """
         Function to check if min is met for all questions.
@@ -276,7 +285,6 @@ class QuizMaker:
         for qMainType in searchTypes.keys():
             for qType in searchTypes[qMainType]:
                 if questionType.lower().find(qType.lower()) != -1:
-                    # print("debug: ",questionType)
                     return qMainType
 
     def fillMinimums(self, quiz):
@@ -424,12 +432,30 @@ class QuizMaker:
 
             self.questionNum += 1  # Increment question number
 
+    def generateQuiz(self):
+        quiz = []  # Create array to store a quiz
+        # Dict to track the number of question types used
+        self.questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
+        # Array to hold question types
+        self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
+        # Check to see if year is a gospel
+        if self.ql.isGospel:
+            self.allQuestionTypes.append("SIT")
+            self.questionTypesUsed["SIT"] = 0
+        self.questionNum = 0  # Iterator for number of questions
+        self.fillMinimums(quiz)
+        self.fillRemainingNumberedQuestions(quiz)
+        random.shuffle(quiz)  # Shuffle the numbered questions
+        self.addQuestionNumbers(quiz)
+        self.addAAndBQuestions(quiz)
+        return quiz
+
 
 if __name__ == "__main__":
     # CDL=> clean up main func
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
     refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
-    qM.generateQuizzes(100, refRange, "default", 0)                     # Generate quizzes
+    qM.generateQuizzes(5, refRange, "default", 0)                     # Generate quizzes
     print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 

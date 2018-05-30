@@ -48,7 +48,7 @@ class MaterialList:
             print("Error => Material file does not exist!!!")
             return
 
-        sheet = book.active  # Open the active sheet
+        sheet = book.worksheets[0]  # Open the first sheet
 
         # Loop through all chapters and store verses
         for chapterData in sheet.iter_rows(min_row = 1, min_col = 1):

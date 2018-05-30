@@ -51,7 +51,7 @@ class UniqueList:
             print("Error => Unique words file does not exist!!!")
             return
 
-        sheet = book.active  # Open the active sheet
+        sheet = book.worksheets[0]  # Open the first sheet
 
         # Loop through all of the unique words
         for row in sheet.iter_rows(min_row = 1, min_col = 1, max_col = 1):
