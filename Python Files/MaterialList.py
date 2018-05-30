@@ -46,25 +46,6 @@ class MaterialList:
                 self.materialRange.append([fields[0], fields[1], verse])
         materialFile.close()
 
-    def printMaterial(self):
-        """
-        Function to print material.
-        """
-
-        chapter = []
-        chapter.append(self.materialRange[0][0])
-        chapter.append(self.materialRange[0][1])
-        for verse in self.materialRange:
-            if verse[1] != chapter[1]:
-                chapterVerses = ",".join(chapter[2:])
-                print(verse[0] + " " + verse[1] + ": " + chapterVerses)
-                chapter.clear()
-                chapter.append(verse[0])
-                chapter.append(verse[1])
-                chapter.append(verse[2])
-            else:
-                chapter.append(verse[2])
-
     def isVerseInRange(self, searchVerse, arrayOfRanges):
         """
         Function to validate that a verse is in one of multiple ranges.
@@ -150,7 +131,7 @@ class MaterialList:
         """
 
         for verse in self.materialRange:
-            if verse[0] == reference[0] and verse[1] == reference[1] and verse[2] == reference[2]:
+            if verse[0] == str(reference[0]) and verse[1] == str(reference[1]) and verse[2] == str(reference[2]):
                 return True
         return False
 

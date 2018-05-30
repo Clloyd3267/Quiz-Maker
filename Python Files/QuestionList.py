@@ -6,6 +6,10 @@
 
 # External Imports
 from pathlib import Path # Used for file manipulation
+import openpyxl # For reading in questions
+
+# Project Imports
+from MaterialList import * # Used to check the reference of questions
 
 class Question:
     """
@@ -53,14 +57,18 @@ class QuestionList:
     A class to store the questions and perform functions on them.
 
     Attributes:
+        mL (MaterialList): Used for checking the references.
+        importErrors (array of errors): Errors while importing.
         questionDatabase (array of Question): The array that stores all of the questions.
         isGospel (bool): Variable to store whether year is a gospel or not.
     """
 
+    mL = MaterialList() # Object of type MaterialList
+    importErrors = [] # Errors while importing
     questionDatabase = []  # The array that stores all of the questions
     isGospel = 0  # Variable to store whether year is a gospel or not
 
-    def __init__(self, questionFileName = "questions.txt"):
+    def __init__(self, questionFileName = "questions.xlsx"):
         """
         The constructor for class Question List.
 
@@ -80,29 +88,89 @@ class QuestionList:
         """
 
         dataFilePath = Path("../Data Files/") # Path where datafiles are stored
-        questionFile = open(dataFilePath / questionFileName, "r", encoding = 'UTF-8')
-        # next(questionFile) # CDL=> Should we assume there is a header row?
+        try:
+            book = openpyxl.load_workbook(dataFilePath / questionFileName)
+        except IOError:
+            print("Error => File does not exist!!!")
+            return
 
-        # For each line in file, place into proper question object
-        for question in questionFile:
-            question = question.rstrip()
-            fields = question.split("$")
-            if len(fields) != 8:
-                print("Oops")
+        sheet = book.active  # Open the active sheet
+        for row in sheet.iter_rows(min_row = 1, min_col = 1, max_col = 8):
+            question = []
+            for cell in row:
+                if not cell.value:
+                    question.append("")
+                else:
+                    question.append(str(cell.value))
+
+            # Check question code
+            valid = False
+            if question[0]:
+                if len(question[0]) == 3:
+                    if question[0][0].isalpha() and question[0][1].isalpha() and question[0][2].isalpha():
+                        valid = True
+            else:
+                valid = True
+
+            if not valid:
+                self.importErrors.append(["Error => Question code invalid!!!", question[:8]])
                 continue
-            if fields[0] != "":
-                fields[0] = self.alphaCodeToDigitCode(fields[0])
-            if "-" in fields[3]:
-                verseRange = fields[3].split("-")
-                fields[3] = verseRange[0]
-                fields[4] = verseRange[1]
-            if "sit" in fields[5].lower():
+
+            # Check reference
+            if not question[1]:
+                self.importErrors.append(["Error => No book!!!", question[:8]])
+                continue
+            if not question[2]:
+                self.importErrors.append(["Error => No chapter!!!", question[:8]])
+                continue
+            if not question[3]:
+                self.importErrors.append(["Error => No verse start!!!", question[:8]])
+                continue
+            if not self.mL.checkRef([question[1],question[2],question[3]]):
+                self.importErrors.append(["Error => Verse start invalid!!!", question[:8]])
+                continue
+            if question[4] and not self.mL.checkRef([question[1], question[2], question[4]]):
+                self.importErrors.append(["Error => Verse end invalid!!!", question[:8]])
+                continue
+
+            # Check type
+            searchTypes = \
+                {"INT": ["INT", "INTF"],
+                 "CR": ["CR", "CRMA"],
+                 "CVR": ["CVR", "CVRMA"],
+                 "MA": ["MA"],
+                 "Q": ["Q", "Q2"],
+                 "FTV": ["FTV", "FT2V", "F2V", "FT", "FTN"]}
+            valid = False
+            for qMainType in searchTypes.keys():
+                for qType in searchTypes[qMainType]:
+                    if question[5].lower().find(qType.lower()) != -1:
+                        valid = True
+            if not valid:
+                self.importErrors.append(["Error => Question type invalid!!!", question[:8]])
+                continue
+
+            # Check question and answer
+            if not question[6]:
+                self.importErrors.append(["Error => No question!!!", question[:8]])
+                continue
+            if not question[7]:
+                self.importErrors.append(["Error => No answer!!!", question[:8]])
+                continue
+
+            # Convert letter question code to number code
+            if question[0] != "":
+                question[0] = self.alphaCodeToDigitCode(question[0])
+
+            # check for Gospel
+            if "sit" in question[5].lower():
                 self.isGospel = 1
-            questionObj = Question(fields[0], fields[1], fields[2],
-                                   fields[3], fields[4], fields[5], fields[6], fields[7])
+
+            questionObj = Question(question[0], question[1], question[2],
+                                   question[3], question[4], question[5], question[6], question[7])
             self.questionDatabase.append(questionObj)
-        questionFile.close()
         self.generateCodes()  # Add unique codes to those that do not have them
+        self.printImportErrors()
 
     def exportQuestions(self, questionFileName):
         """
@@ -112,22 +180,42 @@ class QuestionList:
             questionFileName (str): The output filename for questions.
         """
 
-        dataFilePath = Path("../Data Files/") # Path where datafiles are stored
-        questionFile = open(dataFilePath / questionFileName, "w", encoding = 'UTF-8')  # Open the file for writing
+        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        try:
+            book = openpyxl.load_workbook(dataFilePath / questionFileName)
+        except IOError:
+            print("Error => File does not exist!!!")
+            return
+        sheet1 = book.active  # Open the active sheet questionFileName
+        book.remove(sheet1)
+        for i in book.worksheets:
+            if i.title == "Errors":
+                book.remove(i)
+            elif i.title == "Questions":
+                book.remove(i)
+        book.create_sheet("Questions")
+        book.create_sheet("Errors")
+        sheet1 = book["Questions"]
+        sheet2 = book["Errors"]
 
-        # For each question in question list, write back out to file
-        for question in self.questionDatabase:
-            line = self.digitCodeToAlphaCode(question.questionCode) + "$"
-            line += question.questionBook + "$"
-            line += question.questionChapter + "$"
-            line += question.questionVerseStart + "$"
-            line += question.questionVerseEnd + "$"
-            line += question.questionType + "$"
-            line += question.questionQuestion + "$"
-            line += question.questionAnswer
-            line += "\n"
-            questionFile.write(line)
-        questionFile.close()
+        for rowNum, question in enumerate(self.questionDatabase, start = 1):
+            sheet1.cell(row = rowNum, column = 1).value = self.digitCodeToAlphaCode(question.questionCode)
+            sheet1.cell(row = rowNum, column = 2).value = question.questionBook
+            sheet1.cell(row = rowNum, column = 3).value = question.questionChapter
+            sheet1.cell(row = rowNum, column = 4).value = question.questionVerseStart
+            sheet1.cell(row = rowNum, column = 5).value = question.questionVerseEnd
+            sheet1.cell(row = rowNum, column = 6).value = question.questionType
+            sheet1.cell(row = rowNum, column = 7).value = question.questionQuestion
+            sheet1.cell(row = rowNum, column = 8).value = question.questionAnswer
+
+        for rowNum, questionError in enumerate(self.importErrors, start = 1):
+            i = 1
+            while i != 9:
+                sheet2.cell(row = rowNum, column = i).value = questionError[1][i - 1]
+                i += 1
+            sheet2.cell(row = rowNum, column = 9).value = questionError[0]
+
+        book.save(dataFilePath / questionFileName)
 
     def generateCodes(self):
         """
@@ -258,4 +346,11 @@ class QuestionList:
                       str(self.decToBin(separateDecNums[1], 5)) + str(self.decToBin(separateDecNums[2], 5)))
         digitCode = self.binToDec(binaryCode)
         return digitCode
-    # CDL=> Add print function
+
+    def printImportErrors(self):
+        """
+        Function to print errors.
+        """
+        for error in self.importErrors:
+            print("->", error[0])
+            print("  ", error[1])
