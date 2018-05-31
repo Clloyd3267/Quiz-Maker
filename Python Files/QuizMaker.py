@@ -29,14 +29,14 @@ class QuizMaker:
         cl (ConfigList): Object of type ConfigList.
     """
 
-    def __init__(self):
+    def __init__(self, questionFileName = "questions.xlsx", materialFileName = "material.xlsx", uniqueWordsFileName = "uniqueWords.xlsx"):
         """
         The constructor for class QuizMaker.
         """
 
-        self.ql = QuestionList(questionFileName = "questions.xlsx")  # Create an object of type QuestionList
-        self.ml = MaterialList()  # Create an object of type MaterialList
-        self.uL = UniqueList()
+        self.ql = QuestionList(questionFileName)  # Create an object of type QuestionList
+        self.ml = MaterialList(materialFileName)  # Create an object of type MaterialList
+        self.uL = UniqueList(uniqueWordsFileName) # Create an object of type UniqueList
         self.cl = ConfigList()    # Create an object of type ConfigList
 
         self.configDataName = None
@@ -46,15 +46,14 @@ class QuizMaker:
         self.allQuestionTypes = None
         self.questionNum = None
 
-    def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, isExtraQuestions):
+    def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, outputFilename):
         """
         Function to generate quizzes.
 
         Parameters:
             numQuizzes (int): The number of quizzes wanted.
             arrayOfRanges (array of str): Ranges to use for quiz generation.
-            configDataName (str): Name of config data file.
-            isExtraQuestions (bool): Whether extra questions are wanted.
+            configDataName (str): Name of config data file..
         """
 
         # Error Checking
@@ -66,9 +65,6 @@ class QuizMaker:
             return
         elif not self.ml.checkRange(arrayOfRanges):
             print("Error!!! Ranges are invalid.")
-            return
-        elif not int(isExtraQuestions) in [0, 1]:
-            print("Error!!! isExtraQuestions must be a bool value.")
             return
 
         self.configDataName = configDataName
@@ -101,9 +97,9 @@ class QuizMaker:
             quizNum += 1 # Increment quiz number
 
         self.debugQuizGen(quizzes, configDataName) # Function to debug quizzes
-        self.exportQuizzes(quizzes) # Function to export quizzes to excel
+        self.exportQuizzes(quizzes, outputFilename) # Function to export quizzes to excel
 
-    def exportQuizzes(self, quizzes):
+    def exportQuizzes(self, quizzes, outputFilename):
         """
         Function to export quizzes to excel file.
 
@@ -111,8 +107,7 @@ class QuizMaker:
            quizzes (array of quiz objects): All of the quizzes to be outputted.
         """
 
-        fileName = Path("../Quizzes.xlsx")
-        workbook = xlsxwriter.Workbook(fileName)
+        workbook = xlsxwriter.Workbook(outputFilename)
         worksheet = workbook.add_worksheet()
         allCellFormat = workbook.add_format({'font_size': 11, 'text_wrap': 1, 'valign': 'top', 'border': 1})
         bold = workbook.add_format({'bold': 1})

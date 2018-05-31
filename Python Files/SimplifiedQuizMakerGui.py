@@ -25,8 +25,10 @@ class MainApp(tk.Tk):
         menubar = Menu(self)
         self.config(menu=menubar)
         filemenu = Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Upload", menu=filemenu)
-        filemenu.add_command(label="Upload File", command=self.Question)
+        menubar.add_cascade(label="File", menu=filemenu)
+        filemenu.add_command(label="Select Question File", command=self.Question)
+        filemenu.add_command(label = "Select Unique Words File", command = self.Question)
+        filemenu.add_command(label = "Select Material File", command = self.Question)
         filemenu.add_separator()
 
         filemenu.add_command(label="Exit", command=self.quit)
@@ -39,44 +41,68 @@ class MainApp(tk.Tk):
         DefaultRange = StringVar(value="1 Corinthians,1,1-2 Corinthians,13,14")
         Entry(self, width=40, textvariable=DefaultRange).grid(row=2, column=2, padx=5, pady=5)
 
-        ABCheck = IntVar(value=1)
-        Checkbutton(self, text="Include A's and B's", variable=ABCheck).grid(row=3, column=2, sticky=W, )
-
         Button(self, text="Create Quizzes",
-               command=lambda: self.GenerateQuizzes(DefaultRange, ABCheck, NumQuizzes)).grid(
+               command=lambda: self.GenerateQuizzes(DefaultRange, NumQuizzes)).grid(
             sticky=W, row=4, column=1, padx=5, pady=5, columnspan=2)
 
 
     def Question(self):
         ftypes = [('Excel files', '*.xlsx'), ('All files', '*')]
         dlg = filedialog.Open(self, filetypes=ftypes)
-        global ABCQuestionFile
-        ABCQuestionFile = dlg.show()
+        global QuestionFile
+        QuestionFile = dlg.show()
 
+    def Unique(self):
+        ftypes = [('Excel files', '*.xlsx'), ('All files', '*')]
+        dlg = filedialog.Open(self, filetypes=ftypes)
+        global UniqueFile
+        UniqueFile = dlg.show()
 
+    def Material(self):
+        ftypes = [('Excel files', '*.xlsx'), ('All files', '*')]
+        dlg = filedialog.Open(self, filetypes=ftypes)
+        global MaterialFile
+        MaterialFile = dlg.show()
 
-    def GenerateQuizzes(self, MatRange, ABCheck, NumQuizzes):
-        global ABCQuestionFile
-        if ABCQuestionFile == '':
-            messagebox.showerror("Error!", "Please Upload Question File!")
-            return
+    def Output(self):
+        ftypes = [('Excel files', '*.xlsx'), ('All files', '*')]
+        dlg = filedialog.asksaveasfilename(filetypes = ftypes, initialfile = "Quizzes.xlsx")
+        return dlg
 
-        ABCheck = ABCheck.get()
+    def GenerateQuizzes(self, MatRange, NumQuizzes):
+        outputFilename = self.Output()
+        global QuestionFile
+        if QuestionFile == "":
+            QuestionFile = "questions.xlsx"
+        global UniqueFile
+        if UniqueFile == "":
+            UniqueFile = "uniqueWords.xlsx"
+        global MaterialFile
+        if MaterialFile == "":
+            MaterialFile = "material.xlsx"
+
         NumQuizzes = NumQuizzes.get()
-        qM = QuizMaker()  # Create an object of type QuizMaker
+        qM = QuizMaker(QuestionFile, MaterialFile, UniqueFile)  # Create an object of type QuizMaker
         MatRange = MatRange.get()
-        print(ABCheck)
         refRange = [MatRange]  # Range used as an input
-        qM.generateQuizzes(NumQuizzes, refRange, "default", ABCheck)  # Generate quizzes
+        qM.generateQuizzes(NumQuizzes, refRange, "default", outputFilename)  # Generate quizzes
         print("time elapsed: {:.2f}s".format(time.time() - start_time))
+        self.quit()
 
 
 
 def main():
-    global ABCQuestionFile
-    ABCQuestionFile = ''
+    global QuestionFile
+    global UniqueFile
+    global MaterialFile
+    global OutputFile
+    QuestionFile = ""
+    UniqueFile = ""
+    MaterialFile = ""
     app = MainApp()
-    app.minsize(300, 200)
+    app.minsize(300, 100)
+    app.title("Quiz Maker - Bible Quizzing")
+    app.wm_iconbitmap('myicon.ico')
     app.mainloop()
 
 
