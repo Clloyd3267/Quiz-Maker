@@ -5,11 +5,11 @@
 ###################################################################################################
 
 # External Imports
-from pathlib import Path # Used for file manipulation
 import xlsxwriter # Used to write quizzes to excel files
 import re # Used for pattern matching
 import time # Used to time exception speed
 import random # Used for random numbers and random choice
+from pathlib import Path # Used for file manipulation
 
 # Project Imports
 from QuestionList import *
@@ -34,7 +34,7 @@ class QuizMaker:
         The constructor for class QuizMaker.
         """
 
-        self.ql = QuestionList(questionFileName = "questions.xlsx")  # Create an object of type QuestionList
+        self.ql = QuestionList()  # Create an object of type QuestionList
         self.ml = MaterialList()  # Create an object of type MaterialList
         self.uL = UniqueList()
         self.cl = ConfigList()    # Create an object of type ConfigList
@@ -82,21 +82,23 @@ class QuizMaker:
 
         quizNum = 0 # Iterator for number of quizzes
         while quizNum != numQuizzes:
+            quiz = [] # Create array to store a quiz
 
-            # Generate 50 quizzes
-            quizSelection = []
-            quizRatings = []
-            i = 0
-            while i != 25:
-                quiz = self.generateQuiz()
-                rating = self.rateQuiz(quiz)
-                quizSelection.append(quiz)
-                quizRatings.append(rating)
-                i += 1
+            # Dict to track the number of question types used
+            self.questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
+            # Array to hold question types
+            self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
+            # Check to see if year is a gospel
+            if self.ql.isGospel:
+                self.allQuestionTypes.append("SIT")
+                self.questionTypesUsed["SIT"] = 0
 
-            minIndex = quizRatings.index(min(quizRatings))
-            quiz = quizSelection[minIndex]
-
+            self.questionNum = 0 # Iterator for number of questions
+            self.fillMinimums(quiz)
+            self.fillRemainingNumberedQuestions(quiz)
+            random.shuffle(quiz)  # Shuffle the numbered questions
+            self.addQuestionNumbers(quiz)
+            self.addAAndBQuestions(quiz)
             quizzes.append(quiz) # Add the quiz to the list of quizzes
             quizNum += 1 # Increment quiz number
 
@@ -155,9 +157,8 @@ class QuizMaker:
             print(myString)
         result = []
         word = ""
-        rMatch = re.search(r'According\sto.*Chapter', myString, re.IGNORECASE)
-        qMatch = re.search(r'Quote\sto.*Chapter', myString, re.IGNORECASE)
-        if rMatch or qMatch:
+        match = re.search(r'According\sto.*Chapter', myString, re.IGNORECASE)
+        if match:
             result.append(myString)
             return result
         for character in myString:
@@ -211,17 +212,6 @@ class QuizMaker:
                 total += numNextToEachOther[key]
             print(key + ": " + str(numNextToEachOther[key]))
         print("Total:",total)
-
-    def rateQuiz(self, quiz):
-        score = 0
-        previousType = ""
-
-        for question in quiz:
-            currentType = self.findMainType(question.questionType)
-            if currentType == previousType:
-                score += 1
-            previousType = currentType
-        return score
 
     def minMet(self, questionTypesUsed):
         """
@@ -284,7 +274,8 @@ class QuizMaker:
 
         for qMainType in searchTypes.keys():
             for qType in searchTypes[qMainType]:
-                if questionType.lower().find(qType.lower()) != -1:
+                if questionType.lower().find(qType.lower()) != -1:  # CDL=>Is find case sensitive?
+                    # print("debug: ",questionType)
                     return qMainType
 
     def fillMinimums(self, quiz):
@@ -432,30 +423,12 @@ class QuizMaker:
 
             self.questionNum += 1  # Increment question number
 
-    def generateQuiz(self):
-        quiz = []  # Create array to store a quiz
-        # Dict to track the number of question types used
-        self.questionTypesUsed = {"MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
-        # Array to hold question types
-        self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV"]
-        # Check to see if year is a gospel
-        if self.ql.isGospel:
-            self.allQuestionTypes.append("SIT")
-            self.questionTypesUsed["SIT"] = 0
-        self.questionNum = 0  # Iterator for number of questions
-        self.fillMinimums(quiz)
-        self.fillRemainingNumberedQuestions(quiz)
-        random.shuffle(quiz)  # Shuffle the numbered questions
-        self.addQuestionNumbers(quiz)
-        self.addAAndBQuestions(quiz)
-        return quiz
-
 
 if __name__ == "__main__":
     # CDL=> clean up main func
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
     refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
-    qM.generateQuizzes(5, refRange, "default", 0)                     # Generate quizzes
+    qM.generateQuizzes(5, refRange, "default", 0)                       # Generate quizzes
     print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 

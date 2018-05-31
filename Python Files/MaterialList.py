@@ -6,7 +6,6 @@
 
 # External Imports
 from pathlib import Path # Used for file manipulation
-import openpyxl # For reading in material
 
 class MaterialList:
     """
@@ -18,12 +17,12 @@ class MaterialList:
 
     materialRange = [] # An array to store the material references data
 
-    def __init__(self, materialFileName = "material.xlsx"):
+    def __init__(self, materialFileName = "material.csv"):
         """
         The constructor for class MaterialList.
 
         Parameters:
-            materialFileName (str): The input filename for material, defaults to "material.xlsx".
+            materialFileName (str): The input filename for material, defaults to "material.csv".
         """
 
         self.importMaterial(materialFileName)
@@ -36,26 +35,35 @@ class MaterialList:
            materialFileName (str): The input filename for material.
         """
 
-        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
-        if materialFileName == "material.xlsx":
-            materialFilePath = dataFilePath / materialFileName
-        else:
-            materialFilePath = materialFileName
+        dataFilePath = Path("../Data Files/") # Path where datafiles are stored
+        materialFile = open(dataFilePath / materialFileName, "r")
 
-        try:
-            book = openpyxl.load_workbook(materialFilePath)  # Open the workbook holding the material
-        except IOError:
-            print("Error => Material file does not exist!!!")
-            return
+        # For each verse in object append to materialRange
+        for chapter in materialFile:
+            chapter = chapter.rstrip()
+            fields = chapter.split(",")
+            for verse in fields[2:]:
+                self.materialRange.append([fields[0], fields[1], verse])
+        materialFile.close()
 
-        sheet = book.worksheets[0]  # Open the first sheet
+    def printMaterial(self):
+        """
+        Function to print material.
+        """
 
-        # Loop through all chapters and store verses
-        for chapterData in sheet.iter_rows(min_row = 1, min_col = 1):
-            book = str(chapterData[0].value)
-            chapter = str(chapterData[1].value).replace(" ", "")
-            for verse in chapterData[2:]:
-                self.materialRange.append([book, chapter, str(verse.value).replace(" ", "")])
+        chapter = []
+        chapter.append(self.materialRange[0][0])
+        chapter.append(self.materialRange[0][1])
+        for verse in self.materialRange:
+            if verse[1] != chapter[1]:
+                chapterVerses = ",".join(chapter[2:])
+                print(verse[0] + " " + verse[1] + ": " + chapterVerses)
+                chapter.clear()
+                chapter.append(verse[0])
+                chapter.append(verse[1])
+                chapter.append(verse[2])
+            else:
+                chapter.append(verse[2])
 
     def isVerseInRange(self, searchVerse, arrayOfRanges):
         """
@@ -71,7 +79,7 @@ class MaterialList:
 
         searchVerse = searchVerse.split(",")
         if not self.checkRange(arrayOfRanges) or not self.checkRef(searchVerse):
-            print("Error => Verse not in range or verse doesn't exist!!!", searchVerse[0], searchVerse[1], searchVerse[2]) # CDL=> ERROR spot
+            print("Error!!! verse not in range or verse doesnt exist", searchVerse[0], searchVerse[1], searchVerse[2]) # CDL=> ERROR spot
             return False
 
         for refRange in arrayOfRanges:
@@ -142,7 +150,7 @@ class MaterialList:
         """
 
         for verse in self.materialRange:
-            if verse[0] == str(reference[0]) and verse[1] == str(reference[1]) and verse[2] == str(reference[2]):
+            if verse[0] == reference[0] and verse[1] == reference[1] and verse[2] == reference[2]:
                 return True
         return False
 
