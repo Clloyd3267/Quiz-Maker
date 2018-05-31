@@ -71,6 +71,9 @@ class MainApp(tk.Tk):
 
     def GenerateQuizzes(self, MatRange, NumQuizzes):
         outputFilename = self.Output()
+        if outputFilename == "":
+            return
+
         global QuestionFile
         if QuestionFile == "":
             QuestionFile = "questions.xlsx"
