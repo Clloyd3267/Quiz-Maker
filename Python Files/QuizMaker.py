@@ -17,8 +17,6 @@ from MaterialList import *
 from UniqueList import *
 from ConfigList import *
 
-start_time = time.time() # Start a timer
-
 class QuizMaker:
     """
     A class to perform the high level functions in quiz creation.
@@ -46,7 +44,7 @@ class QuizMaker:
         self.allQuestionTypes = None
         self.questionNum = None
 
-    def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, outputFilename):
+    def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, outputFilename = "Quizzes.xlsx"):
         """
         Function to generate quizzes.
 
@@ -106,8 +104,12 @@ class QuizMaker:
         Parameters:
            quizzes (array of quiz objects): All of the quizzes to be outputted.
         """
+        if outputFilename == "Quizzes.xlsx":
+            fileName = Path("../Quizzes.xlsx")
+            workbook = xlsxwriter.Workbook(fileName)
+        else:
+            workbook = xlsxwriter.Workbook(outputFilename)
 
-        workbook = xlsxwriter.Workbook(outputFilename)
         worksheet = workbook.add_worksheet()
         allCellFormat = workbook.add_format({'font_size': 11, 'text_wrap': 1, 'valign': 'top', 'border': 1})
         bold = workbook.add_format({'bold': 1})
@@ -210,12 +212,19 @@ class QuizMaker:
     def rateQuiz(self, quiz):
         score = 0
         previousType = ""
+        usedChapters = []
 
         for question in quiz:
             currentType = self.findMainType(question.questionType)
             if currentType == previousType:
                 score += 1
             previousType = currentType
+
+            chapter = str(question.questionBook) + str(question.questionChapter)
+            if chapter in usedChapters:
+                score += 1
+            else:
+                usedChapters.append(chapter)
         return score
 
     def minMet(self, questionTypesUsed):
@@ -450,7 +459,7 @@ if __name__ == "__main__":
     # CDL=> clean up main func
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
     refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
-    qM.generateQuizzes(5, refRange, "default", 0)                     # Generate quizzes
+    qM.generateQuizzes(25, refRange, "default")                          # Generate quizzes
     print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 
