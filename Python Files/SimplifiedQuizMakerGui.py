@@ -89,9 +89,7 @@ class MainApp(tk.Tk):
         MatRange = MatRange.get()
         refRange = [MatRange]  # Range used as an input
         qM.generateQuizzes(NumQuizzes, refRange, "default", outputFilename)  # Generate quizzes
-        print("time elapsed: {:.2f}s".format(time.time() - start_time))
-        self.quit()
-
+        messagebox.showinfo("Finished!", "You file has been bolded!")
 
 
 def main():
@@ -105,7 +103,7 @@ def main():
     app = MainApp()
     app.minsize(300, 100)
     app.title("Quiz Maker - Bible Quizzing")
-    app.wm_iconbitmap('myicon.ico')
+    app.wm_iconbitmap('../Data Files/myicon.ico')
     app.mainloop()
 
 
