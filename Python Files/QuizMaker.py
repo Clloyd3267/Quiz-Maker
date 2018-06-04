@@ -23,7 +23,6 @@ class QuizMaker:
 
     Attributes:
         ql (QuestionList): Object of type QuestionList.
-        ml (MaterialList): Object of type MaterialList.
         cl (ConfigList): Object of type ConfigList.
     """
 
@@ -33,7 +32,6 @@ class QuizMaker:
         """
 
         self.ql = QuestionList(questionFileName)  # Create an object of type QuestionList
-        self.ml = MaterialList(materialFileName)  # Create an object of type MaterialList
         self.uL = UniqueList(uniqueWordsFileName) # Create an object of type UniqueList
         self.cl = ConfigList()    # Create an object of type ConfigList
 
@@ -43,6 +41,7 @@ class QuizMaker:
         self.questionTypesUsed = None
         self.allQuestionTypes = None
         self.questionNum = None
+        print("=> QuizMaker Initialized")
 
     def generateQuizzes(self, numQuizzes, arrayOfRanges, configDataName, outputFilename = "Quizzes.xlsx"):
         """
@@ -61,7 +60,7 @@ class QuizMaker:
         elif not configDataName in list(self.cl.configList.keys()):
             print("Error!!! Config Data does not exist.")
             return
-        elif not self.ml.checkRange(arrayOfRanges):
+        elif not self.ql.mL.checkRange(arrayOfRanges):
             print("Error!!! Ranges are invalid.")
             return
 
@@ -93,9 +92,10 @@ class QuizMaker:
 
             quizzes.append(quiz) # Add the quiz to the list of quizzes
             quizNum += 1 # Increment quiz number
-
-        self.debugQuizGen(quizzes, configDataName) # Function to debug quizzes
+        print("=> Quizzes Generated")
+        # self.debugQuizGen(quizzes, configDataName) # Function to debug quizzes
         self.exportQuizzes(quizzes, outputFilename) # Function to export quizzes to excel
+        print("=> Quizzes Exported")
 
     def exportQuizzes(self, quizzes, outputFilename):
         """
@@ -110,19 +110,23 @@ class QuizMaker:
         else:
             workbook = xlsxwriter.Workbook(outputFilename)
 
+        # Set formats
+        workbook.formats[0].set_font_size(9)
+        allCellFormat = workbook.add_format({'font_size': 9,'text_wrap': 1, 'valign': 'top', 'border': 1})
+        bold = workbook.add_format({'font_size': 9, 'bold': 1})
+        nonBold = workbook.add_format({'font_size': 9})
+
         worksheet = workbook.add_worksheet()
-        allCellFormat = workbook.add_format({'font_size': 11, 'text_wrap': 1, 'valign': 'top', 'border': 1})
-        bold = workbook.add_format({'bold': 1})
+
 
         # Size columns
-        colLengthList = [5, 9, 38, 65, 12, 3, 3] # Lengths of columns in output file
+        colLengthList = [4, 7, 32, 46, 14, 3, 3] # Lengths of columns in output file
         for i, width in enumerate(colLengthList):
             worksheet.set_column(i, i, width)
 
         i = 1
         j = 1
         for quiz in quizzes:
-            i += 1
             worksheet.write("A" + str(i),"Quiz " + str(j))
             i += 1
             j += 1
@@ -130,8 +134,8 @@ class QuizMaker:
             for question in quiz:
                 worksheet.write("A" + str(i), question.questionNumber, allCellFormat)
                 worksheet.write("B" + str(i), question.questionType, allCellFormat)
-                worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold), allCellFormat)
-                worksheet.write_rich_string("D" + str(i), *self.boldUniqueWords(question.questionAnswer, bold), allCellFormat)
+                worksheet.write_rich_string("C" + str(i), *self.boldUniqueWords(question.questionQuestion, bold, nonBold), allCellFormat)
+                worksheet.write_rich_string("D" + str(i), *self.boldUniqueWords(question.questionAnswer, bold, nonBold), allCellFormat)
                 worksheet.write("E" + str(i), question.questionBook, allCellFormat)
                 worksheet.write("F" + str(i), question.questionChapter, allCellFormat)
                 worksheet.write("G" + str(i), question.questionVerseStart, allCellFormat)
@@ -139,7 +143,7 @@ class QuizMaker:
 
         workbook.close()
 
-    def boldUniqueWords(self, myString, boldFormat):
+    def boldUniqueWords(self, myString, boldFormat, nonBoldFormat):
         """
         Function to bold unique words in a particular string.
 
@@ -148,13 +152,12 @@ class QuizMaker:
             boldFormat (xlsxwriter format object): The format to be applied to unique words.
         """
 
-        if myString == "":
-            print(myString)
         result = []
         word = ""
         rMatch = re.search(r'According\sto.*Chapter', myString, re.IGNORECASE)
         qMatch = re.search(r'Quote\sto.*Chapter', myString, re.IGNORECASE)
         if rMatch or qMatch:
+            result.append(nonBoldFormat)
             result.append(myString)
             return result
         for character in myString:
@@ -163,11 +166,14 @@ class QuizMaker:
             elif self.uL.isWordUnique(word):
                     result.append(boldFormat)
                     result.append(word)
+                    result.append(nonBoldFormat)
                     result.append(character)
                     word = ""
             else:
                 if word:
+                    result.append(nonBoldFormat)
                     result.append(word)
+                result.append(nonBoldFormat)
                 result.append(character)
                 word = ""
         if word:
@@ -175,6 +181,7 @@ class QuizMaker:
                 result.append(boldFormat)
                 result.append(word)
             else:
+                result.append(nonBoldFormat)
                 result.append(word)
 
         return result
@@ -264,7 +271,7 @@ class QuizMaker:
 
         for question in self.ql.questionDatabase:
             searchVerse = ",".join([question.questionBook, question.questionChapter, question.questionVerseStart])
-            if not self.ml.isVerseInRange(searchVerse, arrayOfRanges):
+            if not self.ql.mL.isVerseInRange(searchVerse, arrayOfRanges):
                 continue
 
             qMainType = self.findMainType(question.questionType)
@@ -360,26 +367,28 @@ class QuizMaker:
 
     def addQuestionNumbers(self, quiz):
         # Add question numbers to the non A and B questions
-        self.questionNum = 1
+        questionNum = 1
         for question in quiz:
-            question.questionNumber = str(self.questionNum)
-            self.questionNum += 1
+            question.questionNumber = str(questionNum)
+            questionNum += 1
 
     def addAAndBQuestions(self, quiz):
         # Array to hold question types
-        self.allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+        allQuestionTypes = ["MA", "CR", "CVR", "Q", "FTV", "INT"]
+        questionTypesUsedAB = {"INT": 0, "MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
         # Check to see if year is a gospel
         if self.ql.isGospel:
-            self.allQuestionTypes.append("SIT")
+            allQuestionTypes.append("SIT")
+            questionTypesUsedAB["SIT"] = 0
 
-        self.questionNum = 1  # Iterator for question number
+        questionNum = 1  # Iterator for question number
         questionIndex = 0  # Iterator for question index
 
         # Loop to fill A and B questions if any
-        while self.questionNum != int(self.cl.configList[self.configDataName].numberOfQuestions) + 1:
+        while questionNum != int(self.cl.configList[self.configDataName].numberOfQuestions) + 1:
 
             # If A and B questions are needed
-            if self.questionNum >= 16 and self.cl.configList[self.configDataName].isAAndB:
+            if questionNum >= 16 and self.cl.configList[self.configDataName].isAAndB == "1":
 
                 # If A and B questions should be filled using the same as the numbered question
                 if self.cl.configList[self.configDataName].sameAB == "1":
@@ -394,7 +403,7 @@ class QuizMaker:
                         else:
                             selectedQuestion = random.choice(self.usedQuestions[qType])
 
-                        selectedQuestion.questionNumber = str(self.questionNum) + subLetter
+                        selectedQuestion.questionNumber = str(questionNum) + subLetter
                         if subLetter == "A":
                             quiz.insert(questionIndex + 1, selectedQuestion)
                         elif subLetter == "B":
@@ -407,11 +416,13 @@ class QuizMaker:
                         questionPicked = False  # Var to track if a question has been picked
                         while not questionPicked:
                             # Pick a random type of question
-                            randomQType = random.choice(self.allQuestionTypes)
+                            randomQType = random.choice(allQuestionTypes)
                             # Check to see if question type has met it's maximum
-                            if randomQType != "INT" and int(self.questionTypesUsed[randomQType]) == int(
-                                self.cl.configList[self.configDataName].typeMinMax[randomQType][1]):
-                                self.allQuestionTypes.remove(randomQType)
+                            if randomQType != "INT" and questionTypesUsedAB[randomQType] == 2:
+                                allQuestionTypes.remove(randomQType)
+                                continue
+                            elif randomQType == "INT" and questionTypesUsedAB[randomQType] == 4:
+                                allQuestionTypes.remove(randomQType)
                                 continue
                             # Select a question from unused pile
                             elif self.allValidQuestions[randomQType]:
@@ -421,20 +432,18 @@ class QuizMaker:
                             # Select a question from used pile
                             else:
                                 selectedQuestion = random.choice(self.usedQuestions[randomQType])
-
-                            selectedQuestion.questionNumber = str(self.questionNum) + subLetter
+                            selectedQuestion.questionNumber = str(questionNum) + subLetter
                             if subLetter == "A":
                                 quiz.insert(questionIndex + 1, selectedQuestion)
                             elif subLetter == "B":
                                 quiz.insert(questionIndex + 2, selectedQuestion)
                             questionPicked = True
-                            self.questionTypesUsed[randomQType] += 1
+                            questionTypesUsedAB[randomQType] += 1
                     questionIndex += 3  # Increment question index
-
             else:
                 questionIndex += 1  # Increment question index
 
-            self.questionNum += 1  # Increment question number
+            questionNum += 1  # Increment question number
 
     def generateQuiz(self):
         quiz = []  # Create array to store a quiz
@@ -459,8 +468,8 @@ if __name__ == "__main__":
     # CDL=> clean up main func
     qM = QuizMaker()                                                    # Create an object of type QuizMaker
     refRange = ["1 Corinthians,1,1-2 Corinthians,13,14"]                # Range used as an input
-    qM.generateQuizzes(25, refRange, "default")                          # Generate quizzes
-    print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
+    qM.generateQuizzes(1, refRange, "default")                          # Generate quizzes
+    # print("time elapsed: {:.2f}s".format(time.time() - start_time))     # Print program run time
 
 
     # Example help functions

@@ -6,6 +6,7 @@
 
 # External Imports
 from pathlib import Path # Used for file manipulation
+import os # Used for file manipulation
 
 
 class Config:
@@ -94,7 +95,7 @@ class ConfigList:
         # Read in filenames for config files
         configFile = open(dataFilePath / configFileName, "r")
         for line in configFile:
-            line.rstrip()
+            line = line.rstrip()
             configFileNames.append(line)
         configFile.close()
 
@@ -119,26 +120,80 @@ class ConfigList:
                                                     randAB, sameAB, intWeight, typeMinsAndMaxs)
             file.close()
 
-    # def exportConfigFiles(self, configFileName):
-    #     """
-    #     Function to export config data.
-    #
-    #     Parameters:
-    #         configFileName (str): The output file name of program config data.
-    #     """
-    #
-    #     # Write out filenames for config files
-    #     configFile = open(configFileName, "w")
-    #     for configName in list(self.configList.keys()):
-    #         fileName = configName + ".csv"
-    #         if fileName != "default.csv":
-    #             configFile.write(fileName)
-    #
-    #     for configName in list(self.configList.keys()):
-    #         try:
-    #             file = open(fileName, 'r')
-    #         except IOError:
-    #             file = open(fileName, 'w')
-    #
+    def exportConfigFiles(self, configFileName = "QuizMakerConfig.csv"):
+        """
+        Function to export config data.
 
-     # CDL=> Add addConfig and editConfig and exportConfigFiles functions
+        Parameters:
+            configFileName (str): The output file name of program config data.
+        """
+
+        # Write out filenames for config files
+        dataFilePath = Path("../Data Files/Config Files/")  # Path where datafiles are stored
+
+        configFile = open(dataFilePath / configFileName, "w")
+        for configName in list(self.configList.keys()):
+            fileName = configName + ".csv\n"
+            if fileName != "default.csv\n":
+                configFile.write(fileName)
+                fileName = configName + ".csv"
+                file = open(dataFilePath / fileName, 'w')
+                file.write("numberOfQuestions:" + str(self.configList[configName].numberOfQuestions) + "\n")
+                file.write("isAAndB:" + str(self.configList[configName].isAAndB) + "\n")
+                file.write("randAB:" + str(self.configList[configName].randAB) + "\n")
+                file.write("sameAB:" + str(self.configList[configName].sameAB) + "\n")
+                file.write("intWeight:" + str(self.configList[configName].intWeight) + "\n")
+                file.write("Min,Max\n")
+                for qType in list(self.configList[configName].typeMinMax.keys()):
+                    file.write(str(qType) + ":" + str(self.configList[configName].typeMinMax[qType][0]) + "," +
+                               str(self.configList[configName].typeMinMax[qType][0]) + "\n")
+                file.close()
+        configFile.close()
+
+    def addConfigFile(self, configData):
+        """
+        Function to add config data.
+
+        Parameters:
+            configData (Config): A config object to be added.
+        """
+
+        #     CDL=> Add validation
+        self.configList[configData.configName] = configData
+        self.exportConfigFiles()
+
+    def deleteConfigFile(self, configName):
+        """
+        Function to delete config data.
+
+        Parameters:
+            configName (str): Name of config data to be deleted.
+        """
+
+        #     CDL=> Add validation
+        dataFilePath = Path("../Data Files/Config Files/")  # Path where datafiles are stored
+
+        del self.configList[configName]
+        self.exportConfigFiles()
+        fileName = configName + ".csv"
+        os.remove(dataFilePath / fileName)
+
+    # CDL=> Add addConfig and editConfig and exportConfigFiles functions
+if __name__ == "__main__":
+    # c1 = Config("test","20","1","1","0","5",{"MA":["2","2"],
+    #                                          "CR":["2","2"],
+    #                                          "CVR":["2","2"],
+    #                                          "Q":["2","2"],
+    #                                          "FTV":["2","2"],
+    #                                          "SIT":["2","2"]})
+    # c2 = Config("yay", "20", "1", "1", "0", "5", {"MA": ["2", "2"],
+    #                                                "CR": ["2", "2"],
+    #                                                "CVR": ["2", "2"],
+    #                                                "Q": ["2", "2"],
+    #                                                "FTV": ["2", "2"],
+    #                                                "SIT": ["2", "2"]})
+    #
+    # cL = ConfigList()  # Create an object of type ConfigList
+    # # cL.addConfigFile(c1)
+    # # cL.addConfigFile(c2)
+    # cL.deleteConfigFile("yay")

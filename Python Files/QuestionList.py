@@ -78,6 +78,7 @@ class QuestionList:
 
         self.importQuestions(questionFileName)
         self.exportQuestions(questionFileName)
+        print("=> QuestionList Initialized")
 
     def importQuestions(self, questionFileName):
         """

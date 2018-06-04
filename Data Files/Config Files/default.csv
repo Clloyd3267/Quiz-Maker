@@ -1,7 +1,7 @@
 numberOfQuestions:20
 isAAndB:1
-randAB:0
-sameAB:1
+randAB:1
+sameAB:0
 intWeight:5
 Min,Max
 MA:2,2

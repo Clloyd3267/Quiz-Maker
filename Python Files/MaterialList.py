@@ -27,6 +27,7 @@ class MaterialList:
         """
 
         self.importMaterial(materialFileName)
+        print("=> MaterialList Initialized")
 
     def importMaterial(self, materialFileName):
         """

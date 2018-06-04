@@ -30,6 +30,7 @@ class UniqueList:
         """
 
         self.importUniqueWords(uniqueWordsFileName)
+        print("=> UniqueList Initialized")
 
     def importUniqueWords(self, uniqueWordsFileName):
         """
