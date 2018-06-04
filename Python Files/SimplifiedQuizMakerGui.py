@@ -89,7 +89,7 @@ class MainApp(tk.Tk):
         MatRange = MatRange.get()
         refRange = [MatRange]  # Range used as an input
         qM.generateQuizzes(NumQuizzes, refRange, "default", outputFilename)  # Generate quizzes
-        messagebox.showinfo("Finished!", "You file has been bolded!")
+        messagebox.showinfo("Finished!", "Quizzes have been generated!")
 
 
 def main():

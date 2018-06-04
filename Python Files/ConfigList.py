@@ -179,7 +179,7 @@ class ConfigList:
         os.remove(dataFilePath / fileName)
 
     # CDL=> Add addConfig and editConfig and exportConfigFiles functions
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # c1 = Config("test","20","1","1","0","5",{"MA":["2","2"],
     #                                          "CR":["2","2"],
     #                                          "CVR":["2","2"],
