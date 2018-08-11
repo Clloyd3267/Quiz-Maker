@@ -1,7 +1,7 @@
 ###################################################################################################
 # Name        : MaterialList.py
 # Author(s)   : Chris Lloyd, Andrew Southwick
-# Description : Classes to store and manage material references
+# Description : Class to store and manage material references
 ###################################################################################################
 
 # External Imports
@@ -13,50 +13,120 @@ class MaterialList:
     A class to store the material and perform operations on it.
 
     Attributes:
+        allVerses (array of verse objects) An array to store all of the verses.
         materialRange (array of str): An array to store the material references data.
+        uniqueWords (array of str): An array to hold all of the unique words.
     """
 
+    allVerses = [] # An array to store all of the verses.
     materialRange = [] # An array to store the material references data
+    uniqueWords = []  # An array to hold all of the unique words
 
-    def __init__(self, materialFileName = "material.xlsx"):
+    def __init__(self, versesFileName = "Verses.xlsx"):
         """
         The constructor for class MaterialList.
 
         Parameters:
-            materialFileName (str): The input filename for material, defaults to "material.xlsx".
+            versesFileName (str): The input filename for material (Defaults to "Verses.xlsx").
         """
 
-        self.importMaterial(materialFileName)
-        print("=> MaterialList Initialized")
+        self.importVerses(versesFileName)
 
-    def importMaterial(self, materialFileName):
+    def importVerses(self, versesFileName):
         """
-        Function to import and store material.
+        Function to import verses from an Excel file.
 
         Parameters:
-           materialFileName (str): The input filename for material.
+            versesFileName (str): The input filename for verse list.
+
+        Returns:
+            (0): No errors, (Anything else): Errors.
         """
 
+        # Create the path for Verse file
         dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
-        if materialFileName == "material.xlsx":
-            materialFilePath = dataFilePath / materialFileName
-        else:
-            materialFilePath = materialFileName
 
+        if versesFileName == "Verses.xlsx":
+            versesFilePath = dataFilePath / versesFileName
+        else:
+            versesFilePath = versesFileName
+
+        # Try opening the verses file
         try:
-            book = openpyxl.load_workbook(materialFilePath)  # Open the workbook holding the material
+            book = openpyxl.load_workbook(versesFilePath)
         except IOError:
-            print("Error => Material file does not exist!!!")
-            return
+            return "Error => Verses file does not exist!!!"
 
         sheet = book.worksheets[0]  # Open the first sheet
 
-        # Loop through all chapters and store verses
-        for chapterData in sheet.iter_rows(min_row = 1, min_col = 1):
-            book = str(chapterData[0].value)
-            chapter = str(chapterData[1].value).replace(" ", "")
-            for verse in chapterData[2:]:
-                self.materialRange.append([book, chapter, str(verse.value).replace(" ", "")])
+        # Read in and parse all verses
+        for row in sheet.iter_rows(min_row = 2, min_col = 1, max_col = 4):
+            # Check to make sure verse is valid
+            verse = []
+            valid = False
+
+            for cell in row:
+                if not cell.value:
+                    verse.append("")
+                else:
+                    verse.append(str(cell.value).strip())
+                    valid = True
+
+            if not valid:
+                continue
+            if not verse[0]:
+                return "Error => No Book!!! " + verse[0] + " " + verse[1] + ":" + verse[2] + " " + verse[3]
+            if not verse[1]:
+                return "Error => No Chapter!!! " + verse[0] + " " + verse[1] + ":" + verse[2] + " " + verse[3]
+            if not verse[2]:
+                return "Error => No Verse Number!!! " + verse[0] + " " + verse[1] + ":" + verse[2] + " " + verse[3]
+            if not verse[3]:
+                return "Error => No Verse!!! " + verse[0] + " " + verse[1] + ":" + verse[2] + " " + verse[3]
+
+            # Split verse
+            verse.append(self.splitVerse(verse[3]))
+
+            # Add verse to list of all verse references
+            self.materialRange.append([str(verse[0]), str(verse[1]), str(verse[2])])
+
+            # Add verse to list of all verses
+            self.allVerses.append(verse)
+
+        # Create Unique Words
+        self.createUniqueWords()
+
+        return 0 # Return with no errors
+
+    def createUniqueWords(self):
+        """
+        Function to create list of all Unique Words.
+
+        Returns:
+            (0): No errors, (Anything else): Errors.
+        """
+
+        tempConcordance = {}
+        for verse in self.allVerses:
+            for i, word in enumerate(verse[4]):
+                newVerseText = verse[3][0:word[1]] + "◆" + verse[3][word[1] + len(word[0]):]
+                word = str(word[0]).upper()
+
+                if word in tempConcordance:
+                    tempConcordance[word][1].append([verse[0], verse[1], verse[2], newVerseText])
+                    tempConcordance[word][0] += 1
+                else:
+                    tempConcordance[word] = [1, [[verse[0], verse[1], verse[2], newVerseText]]]
+
+        for word, value in sorted(tempConcordance.items()):
+            firstOccurence = value[1][0][0:3]
+            uniqueWord = True
+            for occurence in value[1]:
+                if occurence[0:3] != firstOccurence:
+                    uniqueWord = False
+            if uniqueWord:
+                self.uniqueWords.append(word.lower())
+
+        return 0  # Return with no errors
 
     def isVerseInRange(self, searchVerse, arrayOfRanges):
         """
@@ -147,11 +217,59 @@ class MaterialList:
                 return True
         return False
 
+    def splitVerse(self, verseText):
+        """
+        Function to split a verse into individual words.
 
-# if __name__ == '__main__':
-#     ml1 = MaterialList()  # Create an object of type MaterialList
-#     ml1.printMaterial()   # Print all References
-#     refRange = ["1 Corinthians,1,1-2 Corinthians,1,1"] # Test range for checkRange func
-#     verse = "2 Corinthians,2,3"
-#     print("Range Valid: " + str(ml1.checkRange(refRange))) # Testing checkRange func
-#     print("Verse Valid: " + str(ml1.isVerseInRange(verse, refRange))) # Testing checkRange func
+        Parameters:
+            verseText(str): Text of verse to be split.
+
+        Returns:
+            splitVerse(arr): Array of array of str and int representing split verse text.
+        """
+        splitVerse = []
+        partOfWord = ["", 0]
+
+        # Loop through all characters with index
+        for i, character in enumerate(verseText):
+            # Character is part of word
+            if (character.isalnum()) or \
+            (character == "-") or \
+            (character in ["’" , "'"] and partOfWord[0] != "" and
+            (i != 0 and (verseText[i - 5:i].lower() == "jesus") or
+            (i != len(verseText) - 1 and i != 0 and verseText[i - 1].isalnum() and verseText[i + 1].isalnum()))):
+                if partOfWord[0] == "":
+                    partOfWord[1] = i
+                partOfWord[0] += character
+
+            # Character is not part of word
+            else:
+                if partOfWord[0]:
+                    splitVerse.append(partOfWord.copy())
+                    partOfWord[0] = ""
+                    partOfWord[1] = 0
+
+        # Append any leftover characters to splitVerse
+        if partOfWord[0]:
+            splitVerse.append(partOfWord.copy())
+
+        return splitVerse
+
+    def isWordUnique(self, testWord):
+        """
+        Function to check if word is unique.
+
+        Parameters:
+           testWord (str): The input word to be tested.
+
+        Returns:
+            True (bool): Word is unique.
+            False (bool): Word is not unique.
+        """
+
+        testWord = testWord.replace(" ", "")
+        testWord = testWord.lower()
+        if testWord in self.uniqueWords:
+            return True
+        else:
+            return False
