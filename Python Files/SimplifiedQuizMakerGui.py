@@ -36,7 +36,6 @@ class MainApp(tk.Tk):
         ftypes = [('Excel files', '*.xlsx')]
         date = time.strftime("%Y_%m_%d")
         fileName = Path(date + "_Quizzes.xlsx")
-        Path.home()
         dlg = filedialog.asksaveasfilename(filetypes = ftypes, initialdir = Path.home() / "Documents", initialfile = fileName)
         return dlg
 
