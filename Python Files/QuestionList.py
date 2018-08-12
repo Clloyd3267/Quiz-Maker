@@ -164,7 +164,16 @@ class QuestionList:
         sheet1 = book["Questions"]
         sheet2 = book["Errors"]
 
-        for rowNum, question in enumerate(self.questionDatabase, start = 1):
+        # Add headers
+        sheet1.cell(row = 1, column = 1).value = "Book"
+        sheet1.cell(row = 1, column = 2).value = "Chapter"
+        sheet1.cell(row = 1, column = 3).value = "Verse Start"
+        sheet1.cell(row = 1, column = 4).value = "Verse End"
+        sheet1.cell(row = 1, column = 5).value = "Type"
+        sheet1.cell(row = 1, column = 6).value = "Question"
+        sheet1.cell(row = 1, column = 7).value = "Answer"
+
+        for rowNum, question in enumerate(self.questionDatabase, start = 2):
             sheet1.cell(row = rowNum, column = 1).value = question[0]
             sheet1.cell(row = rowNum, column = 2).value = question[1]
             sheet1.cell(row = rowNum, column = 3).value = question[2]
