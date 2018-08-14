@@ -25,7 +25,7 @@ class MainApp(tk.Tk):
         Entry(self, width=3, textvariable=NumQuizzes).grid(sticky=W, row=1, column=2, padx=5, pady=5)
 
         Label(self, text="Range: ").grid(sticky=E, row=2, column=1)
-        DefaultRange = StringVar(value="\"John,1,1-21,25\"")
+        DefaultRange = StringVar(value="John,1,1-John,21,25")
         Entry(self, width=40, textvariable=DefaultRange).grid(row=2, column=2, padx=5, pady=5)
 
         Button(self, text="Create Quizzes",
