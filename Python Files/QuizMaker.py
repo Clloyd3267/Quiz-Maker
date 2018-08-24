@@ -32,6 +32,7 @@ class QuizMaker:
         """
 
         self.qL = QuestionList(questionFileName)  # Create an object of type QuestionList
+        self.numQuestions = 20
 
     ####################################################################################################################
     # Main Functions
@@ -169,13 +170,17 @@ class QuizMaker:
             quiz (array of questions): The entire quiz object.
         """
 
+        if self.numQuestions == 30:
+            numberOfspecialtys = 3
+        else:
+            numberOfspecialtys = 2
         qTypes = ["CR", "CVR", "MA", "Q", "FTV"]
         if self.qL.isGospel:
             qTypes.append("SIT")
         for qType in qTypes:
-            if len(validQuestions[qType]) + len(usedQuestions[qType]) < 2:
+            if len(validQuestions[qType]) + len(usedQuestions[qType]) < numberOfspecialtys:
                 continue
-            for i in range(2):
+            for i in range(numberOfspecialtys):
                 while True:
                     if validQuestions[qType]:
                         randomQuestion = random.choice(validQuestions[qType])
@@ -206,7 +211,11 @@ class QuizMaker:
             quiz (array of questions): The entire quiz object.
         """
 
-        while len(quiz) != 20:
+        if self.numQuestions == 30:
+            numberOfspecialtys = 3
+        else:
+            numberOfspecialtys = 2
+        while len(quiz) != self.numQuestions:
             while True:
                 if validQuestions["INT"]:
                     randomIntQuestion = random.choice(validQuestions["INT"])
@@ -236,6 +245,13 @@ class QuizMaker:
             quiz (array of questions): The entire quiz object.
         """
 
+        if self.numQuestions == 30:
+            numberOfspecialtys = 3
+            questionIndex = 25
+        else:
+            numberOfspecialtys = 2
+            questionIndex = 15
+
         # Dict to track the number of question types used
         questionTypesUsed = {"INT": 0, "MA": 0, "CR": 0, "CVR": 0, "Q": 0, "FTV": 0}
 
@@ -243,9 +259,7 @@ class QuizMaker:
         if self.qL.isGospel:
             questionTypesUsed["SIT"] = 0
 
-        questionIndex = 15
-
-        while questionIndex != 30:
+        while questionIndex != self.numQuestions + 10:
             for i in range(2):
 
                 # Pick a random type
@@ -327,9 +341,15 @@ class QuizMaker:
         bold = workbook.add_format({'bold': 1})
 
         worksheet = workbook.add_worksheet("Quizzes")
-
-        questionNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
+        if self.numQuestions == 30:
+            questionNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
+                           "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "26A", "26B", "27", "27A",
+                           "27B", "28", "28A", "28B", "29", "29A", "29B", "30", "30A", "30B"]
+        else:
+            questionNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
                            "16A", "16B", "17", "17A", "17B", "18", "18A", "18B", "19", "19A", "19B", "20", "20A", "20B"]
+
+
 
         # Size columns
         colLengthList = [3, 10, 32, 46, 4, 2, 2] # Lengths of columns in output file
@@ -339,7 +359,7 @@ class QuizMaker:
         i = 1
         for quizNum, quiz in enumerate(quizzes, start = 1):
             i += 1
-            worksheet.write("A" + str(i),"Quiz " + str(quizNum))
+            worksheet.write("A" + str(i), "Quiz " + str(quizNum))
             i += 1
 
             for questionIndex, question in enumerate(quiz):
