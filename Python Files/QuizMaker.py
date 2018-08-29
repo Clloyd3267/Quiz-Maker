@@ -246,10 +246,8 @@ class QuizMaker:
         """
 
         if self.numQuestions == 30:
-            numberOfspecialtys = 3
             questionIndex = 25
         else:
-            numberOfspecialtys = 2
             questionIndex = 15
 
         # Dict to track the number of question types used
@@ -261,33 +259,34 @@ class QuizMaker:
 
         while questionIndex != self.numQuestions + 10:
             for i in range(2):
+                questionPicked = False
+                while not questionPicked:
 
-                # Pick a random type
-                randomQType = random.choice(list(questionTypesUsed.keys()))
+                    # Pick a random type
+                    randomQType = random.choice(list(questionTypesUsed.keys()))
 
-                # Check to see if question type has met it's maximum
-                if randomQType != "INT" and questionTypesUsed[randomQType] == 2:
-                    del questionTypesUsed[randomQType]
-                    continue
-                elif randomQType == "INT" and questionTypesUsed[randomQType] == 4:
-                    del questionTypesUsed[randomQType]
-                    continue
-                else:
-                    questionTypesUsed[randomQType] =+ 1
-                    while True:
+                    # Check to see if question type has met it's maximum
+                    if randomQType != "INT" and questionTypesUsed[randomQType] == 2:
+                        del questionTypesUsed[randomQType]
+                        continue
+                    elif randomQType == "INT" and questionTypesUsed[randomQType] == 4:
+                        del questionTypesUsed[randomQType]
+                        continue
+                    else:
                         if validQuestions[randomQType]:
                             randomQuestion = random.choice(validQuestions[randomQType])
                             if randomQuestion not in quiz:
                                 quiz.insert(questionIndex + i + 1, randomQuestion)
                                 validQuestions[randomQType].remove(randomQuestion)
-                                break
+                                questionPicked = True
                         elif usedQuestions[randomQType]:
                             randomQuestion = random.choice(usedQuestions[randomQType])
                             if randomQuestion not in quiz:
                                 quiz.insert(questionIndex + i + 1, randomQuestion)
-                                break
-                        else:
-                            continue
+                                questionPicked = True
+
+                questionTypesUsed[randomQType] = + 1
+
             questionIndex += 3
         return quiz
 
@@ -409,6 +408,7 @@ class QuizMaker:
 if __name__ == "__main__":
     start_time = time.time()
     qM = QuizMaker()
-    refRange = ["John,1,1-John,1,51"]
-    qM.generateQuizzes(100, refRange)
+    qM.numQuestions = 20
+    refRange = ["John,1,1-John,1,18"]
+    qM.generateQuizzes(4, refRange)
     print("Done in: {:.2f}s".format(time.time() - start_time))

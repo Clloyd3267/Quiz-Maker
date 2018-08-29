@@ -26,7 +26,7 @@ class MainApp(tk.Tk):
         Entry(self, width=3, textvariable=NumQuizzes).grid(sticky=W, row=1, column=2, padx=5, pady=5)
 
         Label(self, text="Range: ").grid(sticky=E, row=2, column=1)
-        DefaultRange = StringVar(value="John,1,1-John,21,25")
+        DefaultRange = StringVar(value="John 1:1-John 21:25")
         Entry(self, width=40, textvariable=DefaultRange).grid(row=2, column=2, padx=5, pady=5)
 
         Label(self, text = "Number of Questions: ").grid(sticky = E, row = 3, column = 1)
@@ -54,7 +54,7 @@ class MainApp(tk.Tk):
             self.numQuestions = 20
         myButton["text"] = self.numQuestions
 
-    def GenerateQuizzes(self, MatRange, NumQuizzes):
+    def GenerateQuizzes(self, matRange, NumQuizzes):
         outputFilename = self.Output()
         if outputFilename == "":
             return
@@ -62,9 +62,10 @@ class MainApp(tk.Tk):
         NumQuizzes = NumQuizzes.get()
         qM = QuizMaker()  # Create an object of type QuizMaker
         qM.numQuestions = self.numQuestions
-        MatRange = MatRange.get()
-        refRange = [MatRange]  # Range used as an input
-        qM.generateQuizzes(NumQuizzes, refRange, outputFilename)  # Generate quizzes
+        matRange = matRange.get().split(",")
+        for i, mRange in enumerate(matRange):
+            matRange[i] = mRange.strip().replace(" ", ",").replace(":", ",")
+        qM.generateQuizzes(NumQuizzes, matRange, outputFilename)  # Generate quizzes
         messagebox.showinfo("Finished!", "Quizzes have been generated!")
 
 
