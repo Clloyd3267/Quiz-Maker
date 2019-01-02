@@ -190,21 +190,3 @@ class QuestionList:
             sheet2.cell(row = rowNum, column = 8).value = questionError[0]
 
         book.save(dataFilePath / questionFileName)
-
-
-
-
-
-
-
-
-
-
-
-
-        # 1. Find all questions
-        # 2. Fill Minimums
-        # 3. Fill remaining numbered questions
-        # 4. Add question numbers
-        # 5. Add a and b questions
-        # 6. Export quizzes

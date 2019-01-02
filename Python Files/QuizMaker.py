@@ -8,7 +8,8 @@
 from pathlib import Path # Used for file manipulation
 import xlsxwriter # Used to write quizzes to excel files
 import re # Used for pattern matching
-import time # Used to time exception speed
+import datetime # Used to time exception speed
+import time
 import random # Used for random numbers and random choice
 
 # Project Imports
@@ -55,6 +56,8 @@ class QuizMaker:
             print("Error!!! Ranges are invalid.")
             return
 
+        print("{:.2f}s".format(time.time() - start_time), "- Inputs Validated")
+
         quizzes = [] # Array to store quizzes
 
         validQuestions = self.findValidQuestions(arrayOfRanges)
@@ -62,6 +65,7 @@ class QuizMaker:
 
         if self.qL.isGospel:
             usedQuestions["SIT"] = []
+        print("{:.2f}s".format(time.time() - start_time), "- Valid Questions Found")
 
         quizNum = 0 # Iterator for number of quizzes
         while quizNum != numQuizzes:
@@ -70,15 +74,9 @@ class QuizMaker:
             quizRatings = []
             i = 0
             while i != 25:
-                # Generate a single Quiz
-                quiz = []
-                quiz = self.fillMinimums(quiz, validQuestions, usedQuestions)
-                quiz = self.fillRemainingNumbered(quiz, validQuestions, usedQuestions)
-                random.shuffle(quiz)  # Shuffle the numbered questions
-                quiz = self.addAAndBQuestions(quiz, validQuestions, usedQuestions)
-                for question in quiz:
-                    validQuestions[self.findMainType(question[4])].append(question)
+                quiz = self.generateQuiz(validQuestions, usedQuestions)
                 rating = self.rateQuiz(quiz)
+
                 quizSelection.append(quiz)
                 quizRatings.append(rating)
                 i += 1
@@ -89,18 +87,44 @@ class QuizMaker:
 
             # Add used questions
             for question in finalQuiz:
-                validQuestions[self.findMainType(question[4])].remove(question)
-                usedQuestions[self.findMainType(question[4])].append(question)
+                if question in validQuestions[self.findMainType(question[4])]:
+                    validQuestions[self.findMainType(question[4])].remove(question)
+                if question not in usedQuestions[self.findMainType(question[4])]:
+                    usedQuestions[self.findMainType(question[4])].append(question)
 
             quizzes.append(finalQuiz) # Add the quiz to the list of quizzes
 
             quizNum += 1 # Increment quiz number
 
+        print("{:.2f}s".format(time.time() - start_time), "- Quizzes Generated")
+
         self.exportQuizzes(quizzes, outputFilename)
+        print("{:.2f}s".format(time.time() - start_time), "- Quizzes Exported")
 
     ####################################################################################################################
     # Helper Functions
     ####################################################################################################################
+
+    def generateQuiz(self, validQuestions, usedQuestions):
+        # Generate a single Quiz
+        tempValidQuestions = validQuestions.copy()
+        tempUsedQuestions = usedQuestions.copy()
+        quiz = []
+
+        i = 0
+        while i < self.numQuestions / 10:
+            subQuiz = []
+            subQuiz = self.fillMinimums(subQuiz, tempValidQuestions, tempUsedQuestions)
+            subQuiz = self.fillRemainingNumbered(subQuiz, tempValidQuestions, tempUsedQuestions)
+            random.shuffle(subQuiz)
+            if not quiz:
+                quiz = subQuiz
+            else:
+                quiz.extend(subQuiz)
+            i += 1
+        quiz = self.addAAndBQuestions(quiz, tempValidQuestions, tempUsedQuestions)
+        return quiz
+
     def findValidQuestions(self, arrayOfRanges):
         """
         Function to find all valid questions in a given range.
@@ -126,9 +150,6 @@ class QuizMaker:
             if not qMainType:
                 print(question[4])
             validQuestions[qMainType].append(question)
-
-        for qType in validQuestions.keys():
-            random.shuffle(validQuestions[qType])
 
         return validQuestions
 
@@ -170,31 +191,21 @@ class QuizMaker:
             quiz (array of questions): The entire quiz object.
         """
 
-        if self.numQuestions == 30:
-            numberOfspecialtys = 3
-        else:
-            numberOfspecialtys = 2
         qTypes = ["CR", "CVR", "MA", "Q", "FTV"]
         if self.qL.isGospel:
             qTypes.append("SIT")
         for qType in qTypes:
-            if len(validQuestions[qType]) + len(usedQuestions[qType]) < numberOfspecialtys:
-                continue
-            for i in range(numberOfspecialtys):
-                while True:
-                    if validQuestions[qType]:
-                        randomQuestion = random.choice(validQuestions[qType])
-                        if randomQuestion not in quiz:
-                            quiz.append(randomQuestion)
-                            validQuestions[qType].remove(randomQuestion)
-                            break
-                    elif usedQuestions[qType]:
-                        randomQuestion = random.choice(usedQuestions[qType])
-                        if randomQuestion not in quiz:
-                            quiz.append(randomQuestion)
-                            break
-                    else:
-                        print("Error => Not enough" + qType + "s!!!")
+            if validQuestions[qType]:
+                randomQuestion = random.choice(validQuestions[qType])
+                if randomQuestion not in quiz:
+                    quiz.append(randomQuestion)
+                    validQuestions[qType].remove(randomQuestion)
+                    usedQuestions[qType].append(randomQuestion)
+                    continue
+
+            if usedQuestions[qType]:
+                randomQuestion = random.choice(usedQuestions[qType])
+                quiz.append(randomQuestion)
 
         return quiz
 
@@ -211,25 +222,19 @@ class QuizMaker:
             quiz (array of questions): The entire quiz object.
         """
 
-        if self.numQuestions == 30:
-            numberOfspecialtys = 3
-        else:
-            numberOfspecialtys = 2
-        while len(quiz) != self.numQuestions:
-            while True:
-                if validQuestions["INT"]:
-                    randomIntQuestion = random.choice(validQuestions["INT"])
-                    if randomIntQuestion not in quiz:
-                        quiz.append(randomIntQuestion)
-                        validQuestions["INT"].remove(randomIntQuestion)
-                        break
-                elif usedQuestions["INT"]:
-                    randomIntQuestion = random.choice(usedQuestions["INT"])
-                    if randomIntQuestion not in quiz:
-                        quiz.append(randomIntQuestion)
-                        break
-                else:
-                    print("Error => No INTs!!")
+        while len(quiz) <= 9:
+            if validQuestions["INT"]:
+                randomQuestion = random.choice(validQuestions["INT"])
+                if randomQuestion not in quiz:
+                    quiz.append(randomQuestion)
+                    validQuestions["INT"].remove(randomQuestion)
+                    usedQuestions["INT"].append(randomQuestion)
+                    continue
+            if usedQuestions["INT"]:
+                randomQuestion = random.choice(usedQuestions["INT"])
+                quiz.append(randomQuestion)
+                continue
+
         return quiz
 
     def addAAndBQuestions(self, quiz, validQuestions, usedQuestions):
@@ -275,15 +280,15 @@ class QuizMaker:
                     else:
                         if validQuestions[randomQType]:
                             randomQuestion = random.choice(validQuestions[randomQType])
-                            if randomQuestion not in quiz:
-                                quiz.insert(questionIndex + i + 1, randomQuestion)
-                                validQuestions[randomQType].remove(randomQuestion)
-                                questionPicked = True
+                            # if randomQuestion not in quiz:
+                            quiz.insert(questionIndex + i + 1, randomQuestion)
+                            validQuestions[randomQType].remove(randomQuestion)
+                            questionPicked = True
                         elif usedQuestions[randomQType]:
                             randomQuestion = random.choice(usedQuestions[randomQType])
-                            if randomQuestion not in quiz:
-                                quiz.insert(questionIndex + i + 1, randomQuestion)
-                                questionPicked = True
+                            #if randomQuestion not in quiz:
+                            quiz.insert(questionIndex + i + 1, randomQuestion)
+                            questionPicked = True
 
                 questionTypesUsed[randomQType] = + 1
 
@@ -406,9 +411,11 @@ class QuizMaker:
 
 
 if __name__ == "__main__":
+    global start_time
     start_time = time.time()
     qM = QuizMaker()
+    print("{:.2f}s".format(time.time() - start_time), "- Init")
     qM.numQuestions = 20
-    refRange = ["John,1,1-John,1,18"]
-    qM.generateQuizzes(4, refRange)
-    print("Done in: {:.2f}s".format(time.time() - start_time))
+    refRange = ["John,12,1-John,13,4"]
+    qM.generateQuizzes(100, refRange)
+    print("{:.2f}s".format(time.time() - start_time), "- Done")
