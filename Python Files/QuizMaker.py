@@ -56,8 +56,6 @@ class QuizMaker:
             print("Error!!! Ranges are invalid.")
             return
 
-        print("{:.2f}s".format(time.time() - start_time), "- Inputs Validated")
-
         quizzes = [] # Array to store quizzes
 
         validQuestions = self.findValidQuestions(arrayOfRanges)
@@ -65,7 +63,6 @@ class QuizMaker:
 
         if self.qL.isGospel:
             usedQuestions["SIT"] = []
-        print("{:.2f}s".format(time.time() - start_time), "- Valid Questions Found")
 
         quizNum = 0 # Iterator for number of quizzes
         while quizNum != numQuizzes:
@@ -96,10 +93,7 @@ class QuizMaker:
 
             quizNum += 1 # Increment quiz number
 
-        print("{:.2f}s".format(time.time() - start_time), "- Quizzes Generated")
-
         self.exportQuizzes(quizzes, outputFilename)
-        print("{:.2f}s".format(time.time() - start_time), "- Quizzes Exported")
 
     ####################################################################################################################
     # Helper Functions
@@ -411,11 +405,9 @@ class QuizMaker:
 
 
 if __name__ == "__main__":
-    global start_time
-    start_time = time.time()
     qM = QuizMaker()
-    print("{:.2f}s".format(time.time() - start_time), "- Init")
     qM.numQuestions = 20
-    refRange = ["John,12,1-John,13,4"]
-    qM.generateQuizzes(100, refRange)
-    print("{:.2f}s".format(time.time() - start_time), "- Done")
+    refRange = ["John,13,1-John,14,14"]
+    start_time = time.time()
+    qM.generateQuizzes(5, refRange)
+    print("Done in {:.2f}s".format(time.time() - start_time))
