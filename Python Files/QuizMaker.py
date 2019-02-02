@@ -326,12 +326,13 @@ class QuizMaker:
         """
 
         if outputFilename == "Quizzes.xlsx":
-            fileName = Path("../Quizzes.xlsx")
             date = time.strftime("%Y_%m_%d")
             fileName = Path("../" + date + "_Quizzes.xlsx")
             workbook = xlsxwriter.Workbook(fileName)
         else:
-            workbook = xlsxwriter.Workbook(outputFilename)
+            date = time.strftime("%Y_%m_%d")
+            fileName = Path(str(Path.home()) + "/Documents/" + date + "_" + outputFilename + "_Quizzes.xlsx")
+            workbook = xlsxwriter.Workbook(fileName)
 
         # Set formats
         qAndACellFormat = workbook.add_format({'text_wrap': 1, 'valign': 'top', 'border': 1})
