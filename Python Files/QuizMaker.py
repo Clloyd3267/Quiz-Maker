@@ -70,7 +70,7 @@ class QuizMaker:
             quizSelection = []
             quizRatings = []
             i = 0
-            while i != 25:
+            while i != 50:
                 quiz = self.generateQuiz(validQuestions, usedQuestions)
                 rating = self.rateQuiz(quiz)
 
@@ -299,9 +299,11 @@ class QuizMaker:
         Returns:
             score (int): The score of the given quiz.
         """
+
         score = 0
         previousType = ""
         usedChapters = []
+        usedVerses = []
 
         for question in quiz:
             currentType = self.findMainType(question[4])
@@ -310,6 +312,13 @@ class QuizMaker:
             previousType = currentType
 
             chapter = str(question[0]) + str(question[1])
+            verse = str(question[0]) + str(question[1]) + str(question[2])
+
+            if verse in usedVerses:
+                score += 5
+            else:
+                usedVerses.append(verse)
+
             if chapter in usedChapters:
                 score += 1
             else:
