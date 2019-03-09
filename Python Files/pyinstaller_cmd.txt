@@ -1,0 +1,1 @@
+pyinstaller.exe --add-data "Python Files\Data Files;Data Files" -p "Python Files" "Python Files\QuizMaker_Text_Gui.py" --clean  --icon "Python Files\Data Files\myicon.ico" -n QuizMaker  --onefile  -c -n QuizMaker

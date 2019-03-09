@@ -8,6 +8,19 @@
 from pathlib import Path # Used for file manipulation
 import openpyxl # For reading in material
 
+import sys
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 class MaterialList:
     """
     A class to store the material and perform operations on it.
@@ -44,10 +57,11 @@ class MaterialList:
         """
 
         # Create the path for Verse file
-        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        dataFilePath = Path("Data Files/")  # Path where datafiles are stored
+        dataFilePath = resource_path(dataFilePath)
 
         if versesFileName == "Verses.xlsx":
-            versesFilePath = dataFilePath / versesFileName
+            versesFilePath = Path(dataFilePath) / versesFileName
         else:
             versesFilePath = versesFileName
 
@@ -140,6 +154,7 @@ class MaterialList:
             (bool): True or False output indicating result of check.
         """
 
+        # Validate inputs
         searchVerse = searchVerse.split(",")
         if not self.checkRange(arrayOfRanges) or not self.checkRef(searchVerse):
             print("Error => Verse not in range or verse doesn't exist!!!", searchVerse[0], searchVerse[1], searchVerse[2]) # CDL=> ERROR spot
@@ -164,8 +179,9 @@ class MaterialList:
 
             if startIndex <= searchVerseIndex <= endIndex:
                 return True
-            else:
-                return False
+
+        #  If verse not found in ranges
+        return False
 
     def checkRange(self, arrayOfRanges):
         """
@@ -198,7 +214,6 @@ class MaterialList:
 
             if startIndex > endIndex:
                 return False
-
         return True
 
     def checkRef(self, reference):

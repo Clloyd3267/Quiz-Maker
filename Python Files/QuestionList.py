@@ -11,6 +11,18 @@ import openpyxl # For reading in questions
 # Project Imports
 from MaterialList import * # Used to check the reference of questions
 
+import sys
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 class QuestionList:
     """
@@ -50,9 +62,10 @@ class QuestionList:
             questionFileName (str): The input filename for questions.
         """
 
-        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        dataFilePath = Path("Data Files/")  # Path where datafiles are stored
+        dataFilePath = resource_path(dataFilePath)
         if questionFileName == "Questions.xlsx":
-            questionFilePath = dataFilePath / questionFileName
+            questionFilePath = Path(dataFilePath) / questionFileName
         else:
             questionFilePath = questionFileName
 
@@ -141,9 +154,11 @@ class QuestionList:
             questionFileName (str): The output filename for questions.
         """
 
-        dataFilePath = Path("../Data Files/")  # Path where datafiles are stored
+        dataFilePath = Path("Data Files/")  # Path where datafiles are stored
+        dataFilePath = resource_path(dataFilePath)
+
         if questionFileName == "Questions.xlsx":
-            questionFilePath = dataFilePath / questionFileName
+            questionFilePath = Path(dataFilePath) / questionFileName
         else:
             questionFilePath = questionFileName
 
@@ -189,4 +204,4 @@ class QuestionList:
                 i += 1
             sheet2.cell(row = rowNum, column = 8).value = questionError[0]
 
-        book.save(dataFilePath / questionFileName)
+        book.save(Path(dataFilePath) / questionFileName)

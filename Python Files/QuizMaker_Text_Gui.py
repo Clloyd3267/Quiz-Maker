@@ -6,7 +6,7 @@ from QuizMaker import *
 def runProgram(qM):
 
     numQuizzes = 0
-    refRange = ""
+    refRanges = []
     filename = ""
 
     # Print Header
@@ -32,9 +32,9 @@ def runProgram(qM):
     while True:
         print("")
         userInput = input("How many questions do you want? (20 or 30) ")
-        if userInput == "q" or userInput == "Q":
+        if userInput.lower() == "q":
             return 1
-        if userInput == "r" or userInput == "R":
+        if userInput.lower() == "r":
             return 2
 
         if userInput.isnumeric():
@@ -48,31 +48,46 @@ def runProgram(qM):
         print("")
         userInput = input("What is the range of material? "
                           "(Press Enter for all the material or 'h' for help on setting the material range) ")
-        if userInput == "q" or userInput == "Q":
+
+        if userInput.lower() == "q":
             return 1
-        if userInput == "r" or userInput == "R":
+        if userInput.lower() == "r":
             return 2
-        if userInput == "h" or userInput == "H":
-            print("\nEnter the material ranges in the format: 'BOOK,CHAPTER,VERSE-BOOK,CHAPTER,VERSE' "
+        if userInput.lower() == "h":
+            print("\nEnter the material ranges in the format: 'BOOK CHAPTER:VERSE-BOOK CHAPTER:VERSE' "
                   "Enter as many of these ranges separated by a comma. \n"
-                  "Example: 'John,1,1-John,21,25' \n\n")
+                  "Example: 'John 1:2-John 1:4, John 1:6-John 2:3' \n\n")
             continue
 
-        # CDL=> Change?
         if userInput == "":
-            refRange = ["John,1,1-John,21,25"]
-            break
+            refRanges = ["John 1:1-John 21:25"]
         else:
-            refRange = userInput.split()
-            break
+            refRanges = userInput.split(",")
+
+        # Remove leading and trailing spaces
+        refRanges = [range.strip() for range in refRanges]
+
+        # Remove duplicate spaces
+        refRanges = [' '.join(range.split()) for range in refRanges]
+
+        # Remove spaces around "-" and ":"
+        refRanges = [range.replace(" -", "-") for range in refRanges]
+        refRanges = [range.replace("- ", "-") for range in refRanges]
+        refRanges = [range.replace(" :", ":") for range in refRanges]
+        refRanges = [range.replace(": ", ":") for range in refRanges]
+
+        # Replace ":", and " " with ","
+        refRanges = [range.replace(":", ",") for range in refRanges]
+        refRanges = [range.replace(" ", ",") for range in refRanges]
+        break
 
     # Num quizzes loop
     while True:
         print("")
         userInput = input("How many quizzes do you want to generate? ")
-        if userInput == "q" or userInput == "Q":
+        if userInput.lower() == "q":
             return 1
-        if userInput == "r" or userInput == "R":
+        if userInput.lower() == "r":
             return 2
 
         if not userInput.isnumeric():
@@ -85,25 +100,25 @@ def runProgram(qM):
     print("")
     print("File going to documents.")
     userInput = input("What would you like to name this quiz set? ")
-    if userInput == "q" or userInput == "Q":
+    if userInput.lower() == "q":
         return 1
-    if userInput == "r" or userInput == "R":
+    if userInput.lower() == "r":
         return 2
     filename = userInput
 
     # Run the program
     print("Running")
     start_time = time.time()
-    qM.generateQuizzes(numQuizzes, refRange, filename)
+    qM.generateQuizzes(numQuizzes, refRanges, filename)
     print("Done in {:.2f}s".format(time.time() - start_time))
 
     # Done loop
     while True:
         print("")
         userInput = input("Quizzes generated! Would you like to quit 'q' or re-run 'r' the program? ")
-        if userInput == "q" or userInput == "Q":
+        if userInput.lower() == "q":
             return 1
-        if userInput == "r" or userInput == "R":
+        if userInput.lower() == "r":
             return 2
 
 

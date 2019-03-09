@@ -70,7 +70,7 @@ class QuizMaker:
             quizSelection = []
             quizRatings = []
             i = 0
-            while i != 50:
+            while i != 1000:
                 quiz = self.generateQuiz(validQuestions, usedQuestions)
                 rating = self.rateQuiz(quiz)
 
@@ -301,6 +301,7 @@ class QuizMaker:
         """
 
         score = 0
+        previousQuestion = ["","",""]
         previousType = ""
         usedChapters = []
         usedVerses = []
@@ -308,11 +309,19 @@ class QuizMaker:
         for question in quiz:
             currentType = self.findMainType(question[4])
             if currentType == previousType:
-                score += 1
+                score += 5
             previousType = currentType
 
             chapter = str(question[0]) + str(question[1])
             verse = str(question[0]) + str(question[1]) + str(question[2])
+            previousChapter = str(previousQuestion[0]) + str(previousQuestion[1])
+            previousVerse = str(previousQuestion[0]) + str(previousQuestion[1]) + str(previousQuestion[2])
+
+            if previousVerse == verse:
+                score += 25
+
+            if previousChapter == chapter:
+                score += 10
 
             if verse in usedVerses:
                 score += 5
@@ -323,6 +332,8 @@ class QuizMaker:
                 score += 1
             else:
                 usedChapters.append(chapter)
+
+            previousQuestion = question
         return score
 
     def exportQuizzes(self, quizzes, outputFilename):
@@ -356,8 +367,6 @@ class QuizMaker:
         else:
             questionNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
                            "16A", "16B", "17", "17A", "17B", "18", "18A", "18B", "19", "19A", "19B", "20", "20A", "20B"]
-
-
 
         # Size columns
         colLengthList = [3, 10, 32, 46, 4, 2, 2] # Lengths of columns in output file
@@ -417,7 +426,7 @@ class QuizMaker:
 if __name__ == "__main__":
     qM = QuizMaker()
     qM.numQuestions = 20
-    refRange = ["John,13,1-John,14,14"]
+    refRange = ["John,19,31-John,20,18"]
     start_time = time.time()
-    qM.generateQuizzes(5, refRange)
+    qM.generateQuizzes(6, refRange)
     print("Done in {:.2f}s".format(time.time() - start_time))
