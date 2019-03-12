@@ -309,7 +309,7 @@ class QuizMaker:
         for question in quiz:
             currentType = self.findMainType(question[4])
             if currentType == previousType:
-                score += 5
+                score += 100
             previousType = currentType
 
             chapter = str(question[0]) + str(question[1])
@@ -318,13 +318,13 @@ class QuizMaker:
             previousVerse = str(previousQuestion[0]) + str(previousQuestion[1]) + str(previousQuestion[2])
 
             if previousVerse == verse:
-                score += 25
+                score += 1000
 
             if previousChapter == chapter:
                 score += 10
 
             if verse in usedVerses:
-                score += 5
+                score += 750
             else:
                 usedVerses.append(verse)
 
